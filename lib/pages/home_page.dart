@@ -1,5 +1,7 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:mobile_app/pages/service_category_page.dart';
 import 'package:mobile_app/widgets/service_card.dart';
 
 class HomePage extends StatefulWidget {
@@ -79,7 +81,9 @@ class _HomePageState extends State<HomePage> {
           child: Row(
             children: [
               menuButton(
-                onTap: () {},
+                onTap: () {
+                  Get.to<void>(() => const ServiceCategoryPage());
+                },
                 label: 'Kategori Layanan',
                 icon: FluentIcons.stack_16_regular,
               ),

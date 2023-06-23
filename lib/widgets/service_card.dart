@@ -7,6 +7,7 @@ class ServiceCard extends StatelessWidget {
     required this.title,
     required this.description,
     this.onTap,
+    this.margin,
     super.key,
   });
 
@@ -14,12 +15,13 @@ class ServiceCard extends StatelessWidget {
   final String title;
   final String description;
   final int price;
+  final EdgeInsetsGeometry? margin;
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.all(10),
-      elevation: 5,
+      margin: margin ?? const EdgeInsets.all(5),
+      elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(5),
         side: const BorderSide(color: Color(0xFF4A4242), width: 0.2),
