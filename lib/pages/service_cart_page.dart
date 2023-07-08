@@ -45,14 +45,14 @@ final listCart = [
   ),
 ];
 
-class ServiceCardPage extends StatefulWidget {
-  const ServiceCardPage({Key? key}) : super(key: key);
+class ServiceCartPage extends StatefulWidget {
+  const ServiceCartPage({Key? key}) : super(key: key);
 
   @override
-  State<ServiceCardPage> createState() => _ServiceCardPageState();
+  State<ServiceCartPage> createState() => _ServiceCartPageState();
 }
 
-class _ServiceCardPageState extends State<ServiceCardPage> {
+class _ServiceCartPageState extends State<ServiceCartPage> {
   final selectedServiceId = ValueNotifier<int>(listCart.first.id);
 
   @override

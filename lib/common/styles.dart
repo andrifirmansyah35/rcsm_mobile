@@ -33,6 +33,7 @@ const ColorScheme myColorScheme = ColorScheme.light(
   primary: Color(0xffBB2828),
   onPrimary: Color(0xffffffff),
   secondary: Color(0xffffffff),
+  tertiary: Color(0xFF7A7A7A),
   onSecondary: Color(0xff8c0000),
   surface: Color(0xFFede8e8),
   onSurface: Colors.black87,

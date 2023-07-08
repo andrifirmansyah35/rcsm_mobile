@@ -4,8 +4,8 @@ import 'package:mobile_app/common/constants.dart';
 import 'package:mobile_app/pages/service_cart_page.dart';
 import 'package:mobile_app/widgets/service_card.dart';
 
-class DetailServiceCategory extends StatefulWidget {
-  const DetailServiceCategory({
+class DetailServiceCategoryPage extends StatefulWidget {
+  const DetailServiceCategoryPage({
     required this.title,
     required this.id,
     this.imageUrl,
@@ -16,10 +16,11 @@ class DetailServiceCategory extends StatefulWidget {
   final String? imageUrl;
 
   @override
-  State<DetailServiceCategory> createState() => _DetailServiceCategoryState();
+  State<DetailServiceCategoryPage> createState() =>
+      _DetailServiceCategoryState();
 }
 
-class _DetailServiceCategoryState extends State<DetailServiceCategory> {
+class _DetailServiceCategoryState extends State<DetailServiceCategoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -151,7 +152,7 @@ class _DetailServiceCategoryState extends State<DetailServiceCategory> {
                                       onTap: () {
                                         // TODO: Tambah keranjang
                                         Get.back();
-                                        Get.to(() => const ServiceCardPage());
+                                        Get.to(() => const ServiceCartPage());
                                       },
                                       child: Text(
                                         'Ya',

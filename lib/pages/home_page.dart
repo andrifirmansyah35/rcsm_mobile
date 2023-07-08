@@ -1,9 +1,12 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mobile_app/pages/detail_service_category_page.dart';
 import 'package:mobile_app/pages/reservation_page.dart';
+import 'package:mobile_app/pages/schedule_check_page.dart';
 import 'package:mobile_app/pages/service_category_page.dart';
-import 'package:mobile_app/widgets/service_card.dart';
+import 'package:mobile_app/widgets/custom_drawer.dart';
+import 'package:mobile_app/widgets/service_category_card.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -17,7 +20,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      endDrawer: const Drawer(),
+      endDrawer: const CustomDrawer(),
       body: CustomScrollView(
         controller: scrollController,
         slivers: <Widget>[
@@ -25,43 +28,86 @@ class _HomePageState extends State<HomePage> {
             expandedHeight: 50.0,
             floating: true,
             flexibleSpace: customAppBar(context),
+            leading: const SizedBox(),
             // pinned: true,
           ),
           SliverList(
             delegate: SliverChildListDelegate([
               greetingName(context),
-              const SizedBox(height: 15),
+              const SizedBox(height: 8),
               menuSection(context),
-              const SizedBox(height: 15),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 10),
-                    child: Text(
-                      'Mungkin ini layanan yang kamu cari',
-                    ),
-                  ),
-                  ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: 10,
-                    padding: EdgeInsets.zero,
-                    controller: scrollController,
-                    itemBuilder: (context, index) {
-                      return ServiceCard(
-                        title: 'Creambath Organik',
-                        description: 'Perawatan Rambut',
-                        price: 20000,
-                        onTap: () {},
-                      );
-                    },
-                  ),
-                ],
-              ),
+              const SizedBox(height: 10),
+              labelSection(context),
             ]),
           ),
         ],
       ),
+    );
+  }
+
+  Column labelSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ListTile(
+          title: Text(
+            'Daftar Kategori Layanan Tersedia',
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          subtitle: Text(
+            'Klik pada daftar kategori layanan untuk mendapatkan informasi layanan dari kategori yang dipilih',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          trailing: Column(
+            children: [
+              Card(
+                color: Theme.of(context).colorScheme.onError,
+                margin: EdgeInsets.zero,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: InkWell(
+                  onTap: () {
+                    Get.to(() => const ServiceCategoryPage());
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(5),
+                    child: Text(
+                      'Lihat Semua',
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        ListView.builder(
+          shrinkWrap: true,
+          itemCount: 10,
+          padding: EdgeInsets.zero,
+          controller: scrollController,
+          itemBuilder: (context, index) {
+            return ServiceCategoryCard(
+              title: 'Hair Cut',
+              imageUrl:
+                  'https://res.cloudinary.com/dk0z4ums3/image/upload/v1675244075/attached_image/pilihan-perawatan-di-salon-rambut-yang-bisa-kamu-coba.jpg',
+              onTap: () {
+                Get.to(
+                  () => const DetailServiceCategoryPage(
+                    id: 1,
+                    title: 'Hair Cut',
+                    imageUrl:
+                        'https://res.cloudinary.com/dk0z4ums3/image/upload/v1675244075/attached_image/pilihan-perawatan-di-salon-rambut-yang-bisa-kamu-coba.jpg',
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ],
     );
   }
 
@@ -93,12 +139,14 @@ class _HomePageState extends State<HomePage> {
                   Get.to(() => const ReservationPage());
                 },
                 label: 'Reservasi',
-                icon: FluentIcons.cart_16_regular,
+                icon: Icons.aod_sharp,
               ),
               menuButton(
-                onTap: () {},
+                onTap: () {
+                  Get.to(() => const ScheduleCheckPage());
+                },
                 label: 'Cek Jadwal',
-                icon: FluentIcons.calendar_agenda_20_regular,
+                icon: Icons.calendar_month,
               ),
             ],
           ),

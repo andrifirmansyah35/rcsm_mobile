@@ -10,3 +10,11 @@ extension IdrFormat on int {
     return currencyFormatter.format(this);
   }
 }
+
+extension LocalDateFormat on DateTime {
+  String formatToString() {
+    final dateFormat = DateFormat.yMMMMEEEEd('id');
+
+    return dateFormat.format(this);
+  }
+}

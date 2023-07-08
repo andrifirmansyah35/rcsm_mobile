@@ -5,7 +5,7 @@ import 'package:mobile_app/common/constants.dart';
 import 'package:mobile_app/common/extensions.dart';
 import 'package:mobile_app/pages/detail_service_category_page.dart';
 import 'package:mobile_app/pages/home_page.dart';
-import 'package:mobile_app/pages/schedule_page.dart';
+import 'package:mobile_app/pages/schedule_cart_page.dart';
 
 class TransactionPage extends StatefulWidget {
   const TransactionPage({
@@ -20,7 +20,8 @@ class TransactionPage extends StatefulWidget {
 }
 
 class _TransactionPageState extends State<TransactionPage> {
-  String? imageUrl;
+  String? imageUrl =
+      'https://res.cloudinary.com/dk0z4ums3/image/upload/v1675244075/attached_image/pilihan-perawatan-di-salon-rambut-yang-bisa-kamu-coba.jpg';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,7 +52,7 @@ class _TransactionPageState extends State<TransactionPage> {
                   ElevatedButton(
                     onPressed: () {
                       Get.offAll(
-                        () => const DetailServiceCategory(
+                        () => const DetailServiceCategoryPage(
                             title: 'Perawatan Rambut', id: 5),
                       );
                     },
@@ -123,7 +124,7 @@ class _TransactionPageState extends State<TransactionPage> {
                     ),
                   ElevatedButton(
                     onPressed: () {
-                      Get.to(() => const SchedulePage());
+                      Get.to(() => const ScheduleCartPage());
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.background,

@@ -27,7 +27,7 @@ class _ServiceCategoryPageState extends State<ServiceCategoryPage> {
               imageUrl:
                   'https://d1vbn70lmn1nqe.cloudfront.net/prod/wp-content/uploads/2021/07/01103723/Beragam-Pilihan-Perawatan-Rambut-di-Salon-Kecantikan.jpg',
               onTap: () => Get.to<void>(
-                () => const DetailServiceCategory(
+                () => const DetailServiceCategoryPage(
                   id: 1,
                   title: 'Perawatan Rambut',
                   imageUrl:
