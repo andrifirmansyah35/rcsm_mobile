@@ -13,6 +13,7 @@ class App extends StatelessWidget {
       theme: ThemeData(
         colorScheme: myColorScheme,
         textTheme: myTextTheme,
+        scaffoldBackgroundColor: Theme.of(context).colorScheme.background,
       ),
       darkTheme: ThemeData(
         colorScheme: myColorScheme,
