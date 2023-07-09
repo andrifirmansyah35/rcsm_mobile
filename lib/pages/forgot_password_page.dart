@@ -47,7 +47,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               ),
               const SizedBox(height: 5),
               Text(
-                'Masukkan Email yang terhubung dengan akun kamu.\nKode token yang dapat anda gunakan untuk menganti password anda akan dikirimkan ke Email kamu',
+                'Masukkan Email yang terhubung dengan akun kamu.\nKode token yang dapat digunakan untuk menganti password anda akan dikirimkan ke Email kamu',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(),
               ),
               const SizedBox(height: 15),
