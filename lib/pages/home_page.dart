@@ -1,6 +1,7 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mobile_app/common/constants.dart';
 import 'package:mobile_app/pages/detail_service_category_page.dart';
 import 'package:mobile_app/pages/reservation_page.dart';
 import 'package:mobile_app/pages/schedule_check_page.dart';
@@ -184,32 +185,56 @@ class _HomePageState extends State<HomePage> {
     return AppBar(
       leadingWidth: 0,
       leading: const SizedBox(),
-      titleSpacing: 0,
       elevation: 0,
-      title: Container(
-        margin: const EdgeInsets.symmetric(
-          horizontal: 10,
-          vertical: 5,
-        ),
-        height: 35,
-        child: TextField(
-          style: Theme.of(context).textTheme.bodySmall,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: Theme.of(context).colorScheme.onPrimary,
-            hintText: 'Cari layanan...',
-            hintStyle: Theme.of(context).textTheme.bodySmall,
-            contentPadding: EdgeInsets.zero,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
+      titleSpacing: 0,
+      title: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Row(
+          children: [
+            Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(3),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                  child: Image.asset(
+                    Constants.logoSmallPath,
+                    width: 35,
+                  ),
+                ),
+              ],
             ),
-            prefixIcon: const Icon(
-              FluentIcons.search_12_regular,
-              size: 12,
-            ),
-          ),
+            const SizedBox(width: 10),
+            const Text('RCSM Mobile'),
+          ],
         ),
       ),
+      // title: Container(
+      //   margin: const EdgeInsets.symmetric(
+      //     horizontal: 10,
+      //     vertical: 5,
+      //   ),
+      //   height: 35,
+      //   child: TextField(
+      //     style: Theme.of(context).textTheme.bodySmall,
+      //     decoration: InputDecoration(
+      //       filled: true,
+      //       fillColor: Theme.of(context).colorScheme.onPrimary,
+      //       hintText: 'Cari layanan...',
+      //       hintStyle: Theme.of(context).textTheme.bodySmall,
+      //       contentPadding: EdgeInsets.zero,
+      //       border: OutlineInputBorder(
+      //         borderRadius: BorderRadius.circular(10),
+      //       ),
+      //       prefixIcon: const Icon(
+      //         FluentIcons.search_12_regular,
+      //         size: 12,
+      //       ),
+      //     ),
+      //   ),
+      // ),
     );
   }
 

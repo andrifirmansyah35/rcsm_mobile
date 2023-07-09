@@ -2,6 +2,7 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mobile_app/common/constants.dart';
+import 'package:mobile_app/pages/change_password_page.dart';
 import 'package:mobile_app/pages/login_page.dart';
 import 'package:mobile_app/pages/reservation_page.dart';
 import 'package:mobile_app/pages/schedule_cart_page.dart';
@@ -56,7 +57,10 @@ class CustomDrawer extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   TextButton.icon(
-                    onPressed: () {},
+                    onPressed: () {
+                      Get.back();
+                      Get.to(() => const ChangePasswordPage());
+                    },
                     style: TextButton.styleFrom(
                       foregroundColor: Theme.of(context).colorScheme.onPrimary,
                     ),

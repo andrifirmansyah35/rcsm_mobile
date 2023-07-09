@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get_core/get_core.dart';
 import 'package:get/get_navigation/get_navigation.dart';
 import 'package:mobile_app/common/constants.dart';
+import 'package:mobile_app/pages/forgot_password_page.dart';
 import 'package:mobile_app/pages/home_page.dart';
 
 class LoginPage extends StatelessWidget {
@@ -76,7 +77,7 @@ class LoginPage extends StatelessWidget {
                       style: const TextStyle(fontWeight: FontWeight.bold),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
-                          // TODO
+                          Get.to(() => const ForgotPasswordPage());
                         },
                     ),
                     const TextSpan(text: ' untuk memperbarui password.'),
