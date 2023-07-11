@@ -1,6 +1,7 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mobile_app/app/app_injector.dart';
 import 'package:mobile_app/common/constants.dart';
 import 'package:mobile_app/pages/change_password_page.dart';
 import 'package:mobile_app/pages/login_page.dart';
@@ -8,12 +9,15 @@ import 'package:mobile_app/pages/reservation_page.dart';
 import 'package:mobile_app/pages/schedule_cart_page.dart';
 import 'package:mobile_app/pages/schedule_check_page.dart';
 import 'package:mobile_app/pages/service_cart_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CustomDrawer extends StatelessWidget {
   const CustomDrawer({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final prefs = sl<SharedPreferences>();
+
     return Drawer(
       backgroundColor: Theme.of(context).colorScheme.primary,
       child: SafeArea(
@@ -114,6 +118,7 @@ class CustomDrawer extends StatelessWidget {
                   ),
                   TextButton.icon(
                     onPressed: () {
+                      prefs.clear();
                       Get.offAll(() => const LoginPage());
                     },
                     style: TextButton.styleFrom(

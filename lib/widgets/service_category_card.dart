@@ -1,18 +1,17 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:mobile_app/common/constants.dart';
+import 'package:mobile_app/models/response/service_category_model.dart';
+import 'package:mobile_app/pages/detail_service_category_page.dart';
 
 class ServiceCategoryCard extends StatelessWidget {
   const ServiceCategoryCard({
-    required this.title,
-    this.onTap,
-    this.imageUrl,
+    required this.data,
     Key? key,
   }) : super(key: key);
 
-  final void Function()? onTap;
-  final String? imageUrl;
-  final String title;
+  final ServiceCategoryModel data;
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +19,14 @@ class ServiceCategoryCard extends StatelessWidget {
       elevation: 4,
       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       child: InkWell(
-        onTap: onTap,
+        onTap: () {
+          // TODO
+          Get.to(
+            () => DetailServiceCategoryPage(
+              data: data,
+            ),
+          );
+        },
         child: Padding(
           padding: const EdgeInsets.all(10),
           child: Row(
@@ -28,19 +34,22 @@ class ServiceCategoryCard extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(50),
-                child: imageUrl != null
-                    ? Image.network(
-                        imageUrl!,
-                        width: 60,
-                        height: 60,
-                        fit: BoxFit.cover,
-                      )
-                    : Image.asset(
-                        Constants.dummyImagePath,
-                        width: 60,
-                        height: 60,
-                        fit: BoxFit.cover,
-                      ),
+                child: FadeInImage(
+                  image: NetworkImage('${Constants.storageUrl}/${data.gambar}'),
+                  placeholder: const AssetImage(
+                    Constants.dummyImagePath,
+                  ),
+                  imageErrorBuilder: (context, error, stackTrace) =>
+                      Image.asset(
+                    Constants.dummyImagePath,
+                    width: 60,
+                    height: 60,
+                    fit: BoxFit.cover,
+                  ),
+                  width: 60,
+                  height: 60,
+                  fit: BoxFit.cover,
+                ),
               ),
               const SizedBox(width: 15),
               Expanded(
@@ -48,13 +57,13 @@ class ServiceCategoryCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      title,
+                      data.nama,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
-                    Text(
-                      '18 Layanan',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
+                    // Text(
+                    //   '18 Layanan',
+                    //   style: Theme.of(context).textTheme.bodySmall,
+                    // ),
                   ],
                 ),
               ),

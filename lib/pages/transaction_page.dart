@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mobile_app/common/constants.dart';
 import 'package:mobile_app/common/extensions.dart';
-import 'package:mobile_app/pages/detail_service_category_page.dart';
 import 'package:mobile_app/pages/home_page.dart';
 import 'package:mobile_app/pages/schedule_cart_page.dart';
 
@@ -51,10 +50,11 @@ class _TransactionPageState extends State<TransactionPage> {
                   const SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: () {
-                      Get.offAll(
-                        () => const DetailServiceCategoryPage(
-                            title: 'Perawatan Rambut', id: 5),
-                      );
+                      // TODO
+                      // Get.offAll(
+                      //   () => const DetailServiceCategoryPage(
+                      //       title: 'Perawatan Rambut', id: 5),
+                      // );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.background,

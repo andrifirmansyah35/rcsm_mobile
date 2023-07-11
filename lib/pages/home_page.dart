@@ -1,13 +1,17 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:mobile_app/app/app_injector.dart';
 import 'package:mobile_app/common/constants.dart';
-import 'package:mobile_app/pages/detail_service_category_page.dart';
+import 'package:mobile_app/cubit/service_category_cubit.dart';
+import 'package:mobile_app/models/response/service_category_model.dart';
 import 'package:mobile_app/pages/reservation_page.dart';
 import 'package:mobile_app/pages/schedule_check_page.dart';
 import 'package:mobile_app/pages/service_category_page.dart';
 import 'package:mobile_app/widgets/custom_drawer.dart';
 import 'package:mobile_app/widgets/service_category_card.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -18,35 +22,82 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final scrollController = ScrollController();
+
+  final serviceCategoryCubit = sl<ServiceCategoryCubit>();
+  final prefs = sl<SharedPreferences>();
+
+  void refresh() {
+    serviceCategoryCubit.fetchData();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    refresh();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final memberName = prefs.getString(Constants.keyMemberName);
+
     return Scaffold(
       endDrawer: const CustomDrawer(),
-      body: CustomScrollView(
-        controller: scrollController,
-        slivers: <Widget>[
-          SliverAppBar(
-            expandedHeight: 50.0,
-            floating: true,
-            flexibleSpace: customAppBar(context),
-            leading: const SizedBox(),
-            // pinned: true,
-          ),
-          SliverList(
-            delegate: SliverChildListDelegate([
-              greetingName(context),
-              const SizedBox(height: 8),
-              menuSection(context),
-              const SizedBox(height: 10),
-              labelSection(context),
-            ]),
+      body: Stack(
+        children: [
+          NestedScrollView(
+            controller: scrollController,
+            headerSliverBuilder: (context, innerBoxScrolled) => [
+              SliverAppBar(
+                expandedHeight: 50.0,
+                floating: true,
+                flexibleSpace: customAppBar(context),
+                leading: const SizedBox(),
+                // pinned: true,
+              ),
+            ],
+            body: RefreshIndicator(
+              onRefresh: () async => refresh(),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    greetingName(context, memberName ?? ''),
+                    const SizedBox(height: 8),
+                    menuSection(context),
+                    const SizedBox(height: 10),
+                    BlocBuilder<ServiceCategoryCubit, ServiceCategoryState>(
+                      bloc: serviceCategoryCubit,
+                      builder: (context, state) {
+                        if (state is ServiceCategorySuccess) {
+                          return servieCategorySection(context, state.response);
+                        }
+
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 50),
+                          child: Center(
+                            child: state is ServiceCategoryFailed
+                                ? Center(child: Text(state.message))
+                                : state is ServiceCategoryLoading
+                                    ? const CircularProgressIndicator()
+                                    : const SizedBox(),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Column labelSection(BuildContext context) {
+  Column servieCategorySection(
+    BuildContext context,
+    List<ServiceCategoryModel> data,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -87,25 +138,11 @@ class _HomePageState extends State<HomePage> {
         ),
         ListView.builder(
           shrinkWrap: true,
-          itemCount: 10,
+          itemCount: data.length,
           padding: EdgeInsets.zero,
           controller: scrollController,
           itemBuilder: (context, index) {
-            return ServiceCategoryCard(
-              title: 'Hair Cut',
-              imageUrl:
-                  'https://res.cloudinary.com/dk0z4ums3/image/upload/v1675244075/attached_image/pilihan-perawatan-di-salon-rambut-yang-bisa-kamu-coba.jpg',
-              onTap: () {
-                Get.to(
-                  () => const DetailServiceCategoryPage(
-                    id: 1,
-                    title: 'Hair Cut',
-                    imageUrl:
-                        'https://res.cloudinary.com/dk0z4ums3/image/upload/v1675244075/attached_image/pilihan-perawatan-di-salon-rambut-yang-bisa-kamu-coba.jpg',
-                  ),
-                );
-              },
-            );
+            return ServiceCategoryCard(data: data[index]);
           },
         ),
       ],
@@ -156,20 +193,20 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Container greetingName(BuildContext context) {
+  Container greetingName(BuildContext context, String memberName) {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 5, 20, 10),
       color: Theme.of(context).colorScheme.primary,
       child: RichText(
         textAlign: TextAlign.left,
         text: TextSpan(
-          text: 'Hai Member, ',
+          text: 'Hai Member',
           style: Theme.of(context).textTheme.bodySmall!.copyWith(
                 color: Theme.of(context).colorScheme.onPrimary,
               ),
           children: <TextSpan>[
             TextSpan(
-              text: 'Happy Nessa M',
+              text: ', $memberName',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).colorScheme.onPrimary,

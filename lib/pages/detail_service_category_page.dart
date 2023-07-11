@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mobile_app/common/constants.dart';
+import 'package:mobile_app/models/response/service_category_model.dart';
 import 'package:mobile_app/pages/service_cart_page.dart';
 import 'package:mobile_app/widgets/service_card.dart';
 
 class DetailServiceCategoryPage extends StatefulWidget {
   const DetailServiceCategoryPage({
-    required this.title,
-    required this.id,
-    this.imageUrl,
+    required this.data,
     Key? key,
   }) : super(key: key);
-  final int id;
-  final String title;
-  final String? imageUrl;
+
+  final ServiceCategoryModel data;
 
   @override
   State<DetailServiceCategoryPage> createState() =>
@@ -37,19 +35,23 @@ class _DetailServiceCategoryState extends State<DetailServiceCategoryPage> {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(50),
-                    child: widget.imageUrl != null
-                        ? Image.network(
-                            widget.imageUrl!,
-                            width: 60,
-                            height: 60,
-                            fit: BoxFit.cover,
-                          )
-                        : Image.asset(
-                            Constants.dummyImagePath,
-                            width: 60,
-                            height: 60,
-                            fit: BoxFit.cover,
-                          ),
+                    child: FadeInImage(
+                      image: NetworkImage(
+                          '${Constants.storageUrl}/${widget.data.gambar}'),
+                      placeholder: const AssetImage(
+                        Constants.dummyImagePath,
+                      ),
+                      imageErrorBuilder: (context, error, stackTrace) =>
+                          Image.asset(
+                        Constants.dummyImagePath,
+                        width: 60,
+                        height: 60,
+                        fit: BoxFit.cover,
+                      ),
+                      width: 60,
+                      height: 60,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                   const SizedBox(width: 15),
                   Expanded(
@@ -58,7 +60,7 @@ class _DetailServiceCategoryState extends State<DetailServiceCategoryPage> {
                       children: [
                         const SizedBox(height: 5),
                         Text(
-                          'Perawatan Rambut',
+                          widget.data.nama,
                           style: Theme.of(context)
                               .textTheme
                               .bodyLarge
