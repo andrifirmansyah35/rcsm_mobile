@@ -10,6 +10,7 @@ import 'package:mobile_app/pages/reservation_page.dart';
 import 'package:mobile_app/pages/schedule_check_page.dart';
 import 'package:mobile_app/pages/service_category_page.dart';
 import 'package:mobile_app/widgets/custom_drawer.dart';
+import 'package:mobile_app/widgets/error_indicator.dart';
 import 'package:mobile_app/widgets/service_category_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -62,8 +63,8 @@ class _HomePageState extends State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     greetingName(context, memberName ?? ''),
-                    const SizedBox(height: 8),
-                    menuSection(context),
+                    // const SizedBox(height: 8),
+                    // menuSection(context),
                     const SizedBox(height: 10),
                     BlocBuilder<ServiceCategoryCubit, ServiceCategoryState>(
                       bloc: serviceCategoryCubit,
@@ -72,11 +73,14 @@ class _HomePageState extends State<HomePage> {
                           return servieCategorySection(context, state.response);
                         }
 
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 50),
+                        return SizedBox(
+                          height: Get.height / 2,
                           child: Center(
                             child: state is ServiceCategoryFailed
-                                ? Center(child: Text(state.message))
+                                ? ErrorIndicator(
+                                    message: state.message,
+                                    onRefresh: refresh,
+                                  )
                                 : state is ServiceCategoryLoading
                                     ? const CircularProgressIndicator()
                                     : const SizedBox(),
@@ -110,31 +114,31 @@ class _HomePageState extends State<HomePage> {
             'Klik pada daftar kategori layanan untuk mendapatkan informasi layanan dari kategori yang dipilih',
             style: Theme.of(context).textTheme.bodySmall,
           ),
-          trailing: Column(
-            children: [
-              Card(
-                color: Theme.of(context).colorScheme.onError,
-                margin: EdgeInsets.zero,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: InkWell(
-                  onTap: () {
-                    Get.to(() => const ServiceCategoryPage());
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(5),
-                    child: Text(
-                      'Lihat Semua',
-                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+          // trailing: Column(
+          //   children: [
+          //     Card(
+          //       color: Theme.of(context).colorScheme.onError,
+          //       margin: EdgeInsets.zero,
+          //       shape: RoundedRectangleBorder(
+          //         borderRadius: BorderRadius.circular(8),
+          //       ),
+          //       child: InkWell(
+          //         onTap: () {
+          //           Get.to(() => const ServiceCategoryPage());
+          //         },
+          //         child: Padding(
+          //           padding: const EdgeInsets.all(5),
+          //           child: Text(
+          //             'Lihat Semua',
+          //             style: Theme.of(context).textTheme.bodySmall!.copyWith(
+          //                   color: Theme.of(context).colorScheme.onPrimary,
+          //                 ),
+          //           ),
+          //         ),
+          //       ),
+          //     ),
+          //   ],
+          // ),
         ),
         ListView.builder(
           shrinkWrap: true,

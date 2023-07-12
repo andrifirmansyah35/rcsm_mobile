@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:mobile_app/cubit/list_service_cubit.dart';
 import 'package:mobile_app/cubit/login_cubit.dart';
 import 'package:mobile_app/cubit/service_category_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,5 +14,6 @@ class AppInjector {
 
     sl.registerFactory(() => LoginCubit());
     sl.registerFactory(() => ServiceCategoryCubit());
+    sl.registerFactory(() => ListServiceCubit());
   }
 }

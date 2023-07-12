@@ -21,4 +21,6 @@ ServiceCategoryModel _$ServiceCategoryModelFromJson(
       id: json['id'] as int,
       nama: json['nama'] as String,
       gambar: json['gambar'] as String,
+      slug: json['slug'] as String,
+      jumlahLayanan: json['jumlah_layanan'] as int,
     );

@@ -33,34 +33,36 @@ class _ServiceCategoryPageState extends State<ServiceCategoryPage> {
       ),
       body: RefreshIndicator(
         onRefresh: () async => onRefresh,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: BlocBuilder<ServiceCategoryCubit, ServiceCategoryState>(
-            bloc: serviceCategoryCubit,
-            builder: (context, state) {
-              if (state is ServiceCategorySuccess) {
-                return Column(
-                  children: List.generate(
-                    state.response.length,
-                    (index) => ServiceCategoryCard(
-                      data: state.response[index],
+        child: BlocBuilder<ServiceCategoryCubit, ServiceCategoryState>(
+          bloc: serviceCategoryCubit,
+          builder: (context, state) {
+            return Stack(
+              children: [
+                if (state is ServiceCategorySuccess)
+                  SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Column(
+                      children: List.generate(
+                        state.response.length,
+                        (index) => ServiceCategoryCard(
+                          data: state.response[index],
+                        ),
+                      ),
                     ),
                   ),
-                );
-              }
-
-              return SizedBox(
-                height: Get.height,
-                child: Center(
-                  child: state is ServiceCategoryFailed
-                      ? Text(state.message)
-                      : state is ServiceCategoryLoading
-                          ? const CircularProgressIndicator()
-                          : const SizedBox(),
+                SizedBox(
+                  height: Get.height,
+                  child: Center(
+                    child: state is ServiceCategoryFailed
+                        ? Text(state.message)
+                        : state is ServiceCategoryLoading
+                            ? const CircularProgressIndicator()
+                            : const SizedBox(),
+                  ),
                 ),
-              );
-            },
-          ),
+              ],
+            );
+          },
         ),
       ),
     );

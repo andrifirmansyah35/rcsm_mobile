@@ -20,7 +20,6 @@ class ServiceCategoryCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       child: InkWell(
         onTap: () {
-          // TODO
           Get.to(
             () => DetailServiceCategoryPage(
               data: data,
@@ -60,10 +59,10 @@ class ServiceCategoryCard extends StatelessWidget {
                       data.nama,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
-                    // Text(
-                    //   '18 Layanan',
-                    //   style: Theme.of(context).textTheme.bodySmall,
-                    // ),
+                    Text(
+                      '${data.jumlahLayanan} Layanan',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
                   ],
                 ),
               ),

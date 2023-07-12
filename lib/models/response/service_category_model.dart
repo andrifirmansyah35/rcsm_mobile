@@ -22,11 +22,15 @@ class ServiceCategoryModel extends Equatable {
   final int id;
   final String nama;
   final String gambar;
+  final String slug;
+  final int jumlahLayanan;
 
   const ServiceCategoryModel({
     required this.id,
     required this.nama,
     required this.gambar,
+    required this.slug,
+    required this.jumlahLayanan,
   });
   factory ServiceCategoryModel.fromJson(Map<String, dynamic> json) =>
       _$ServiceCategoryModelFromJson(json);

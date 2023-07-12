@@ -18,3 +18,17 @@ extension LocalDateFormat on DateTime {
     return dateFormat.format(this);
   }
 }
+
+extension IdrFormatFromString on String {
+  String convertToIdr() {
+    NumberFormat currencyFormatter = NumberFormat.currency(
+      locale: 'id',
+      symbol: 'Rp ',
+      decimalDigits: 2,
+    );
+
+    final currencyInt = int.parse(this);
+
+    return currencyFormatter.format(currencyInt);
+  }
+}
