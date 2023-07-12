@@ -4,6 +4,7 @@ import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:mobile_app/app/app_injector.dart';
 import 'package:mobile_app/common/constants.dart';
 import 'package:mobile_app/common/styles.dart';
+import 'package:mobile_app/cubit/list_service_cart_cubit.dart';
 import 'package:mobile_app/cubit/list_service_cubit.dart';
 import 'package:mobile_app/cubit/login_cubit.dart';
 import 'package:mobile_app/cubit/service_category_cubit.dart';
@@ -29,6 +30,9 @@ class App extends StatelessWidget {
         ),
         BlocProvider<ListServiceCubit>(
           create: (context) => sl<ListServiceCubit>(),
+        ),
+        BlocProvider<ListServiceCartCubit>(
+          create: (context) => sl<ListServiceCartCubit>(),
         ),
       ],
       child: GetMaterialApp(

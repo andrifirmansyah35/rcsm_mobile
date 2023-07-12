@@ -1,0 +1,49 @@
+import 'dart:convert';
+import 'dart:developer';
+import 'dart:io';
+
+import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:http/http.dart' as http;
+import 'package:mobile_app/app/app_injector.dart';
+import 'package:mobile_app/common/constants.dart';
+import 'package:mobile_app/models/response/service_cart_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+part 'list_service_cart_state.dart';
+
+class ListServiceCartCubit extends Cubit<ListServiceCartState> {
+  ListServiceCartCubit() : super(ListServiceCartInitial());
+
+  Future<void> fetchData() async {
+    emit(ListServiceCartLoading());
+    try {
+      final uri = Uri.parse('${Constants.apiBaseUrl}/keranjang-layanan-user');
+      final token = sl<SharedPreferences>().getString(Constants.keyToken);
+
+      final response = await http.get(
+        uri,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      log(response.body);
+      if (response.statusCode == 200) {
+        final result = ListServiceCartModel.fromJson(
+          jsonDecode(response.body),
+        );
+        emit(ListServiceCartSuccess(result));
+      }
+    } on SocketException {
+      emit(
+        const ListServiceCartFailed(
+            'Tidak dapat terhubung. Mohon periksa ulang koneksi kamu'),
+      );
+    } catch (e) {
+      emit(
+        ListServiceCartFailed(e.toString()),
+      );
+    }
+  }
+}

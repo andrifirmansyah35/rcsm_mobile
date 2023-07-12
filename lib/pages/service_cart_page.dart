@@ -1,49 +1,12 @@
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:mobile_app/app/app_injector.dart';
 import 'package:mobile_app/common/extensions.dart';
+import 'package:mobile_app/cubit/list_service_cart_cubit.dart';
+import 'package:mobile_app/models/response/service_cart_model.dart';
 import 'package:mobile_app/pages/transaction_page.dart';
-
-class CartModel {
-  final int id;
-  final String title;
-  final String desc;
-  final int price;
-
-  CartModel({
-    required this.id,
-    required this.title,
-    required this.desc,
-    required this.price,
-  });
-}
-
-final listCart = [
-  CartModel(
-    id: 1,
-    title: 'Perawatan Rambut',
-    desc: 'Hair Cut ',
-    price: 20000,
-  ),
-  CartModel(
-    id: 2,
-    title: 'Perawatan Rambut',
-    desc: 'Semir',
-    price: 25000,
-  ),
-  CartModel(
-    id: 3,
-    title: 'Perawatan Rambut',
-    desc: 'Semir',
-    price: 25000,
-  ),
-  CartModel(
-    id: 4,
-    title: 'Perawatan Rambut',
-    desc: 'Semir',
-    price: 25000,
-  ),
-];
+import 'package:mobile_app/widgets/error_indicator.dart';
 
 class ServiceCartPage extends StatefulWidget {
   const ServiceCartPage({Key? key}) : super(key: key);
@@ -53,71 +16,116 @@ class ServiceCartPage extends StatefulWidget {
 }
 
 class _ServiceCartPageState extends State<ServiceCartPage> {
-  final selectedServiceId = ValueNotifier<int>(listCart.first.id);
+  final selectedServiceId = ValueNotifier<int>(0);
+  final listServiceCartCubit = sl<ListServiceCartCubit>();
+
+  void refresh() {
+    listServiceCartCubit.fetchData();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    refresh();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Keranjang Layanan'),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(12),
-        child: ValueListenableBuilder<int>(
-          valueListenable: selectedServiceId,
-          builder: (context, value, _) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+    return BlocConsumer<ListServiceCartCubit, ListServiceCartState>(
+      bloc: listServiceCartCubit,
+      listener: (context, state) {
+        if (state is ListServiceCartSuccess) {
+          selectedServiceId.value =
+              state.response.dataKeranjangLayananOpen.first.idKeranjangLayanan;
+        }
+      },
+      builder: (context, state) {
+        return Scaffold(
+            appBar: AppBar(
+              title: const Text('Keranjang Layanan'),
+            ),
+            body: ListView(
+              padding: const EdgeInsets.all(12),
               children: [
-                Column(
-                  children: List.generate(
-                    listCart.length,
-                    (index) => serviceCartRadio(
-                      context: context,
-                      model: listCart[index],
-                      selectedValue: value,
+                if (state is ListServiceCartSuccess)
+                  ValueListenableBuilder<int>(
+                    valueListenable: selectedServiceId,
+                    builder: (context, value, _) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Column(
+                            children: List.generate(
+                              state.response.dataKeranjangLayananOpen.length,
+                              (index) => serviceCartRadio(
+                                context: context,
+                                model: state
+                                    .response.dataKeranjangLayananOpen[index],
+                                selectedValue: value,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          const Divider(),
+                          Column(
+                            children: [
+                              closedServiceHeading(
+                                context: context,
+                                onDelete: () {},
+                              ),
+                              const SizedBox(height: 5),
+                              Column(
+                                children: List.generate(
+                                  state.response.dataKeranjangClose.length,
+                                  (index) => Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 5,
+                                    ),
+                                    child: closedServiceCard(
+                                        context,
+                                        state.response
+                                            .dataKeranjangClose[index]),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        ],
+                      );
+                    },
+                  )
+                else
+                  SizedBox(
+                    height: Get.height,
+                    child: Center(
+                      child: state is ListServiceCartFailed
+                          ? ErrorIndicator(
+                              message: state.message,
+                            )
+                          : state is ListServiceCartLoading
+                              ? const CircularProgressIndicator()
+                              : const SizedBox(),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                const Divider(),
-                Column(
-                  children: [
-                    closedServiceHeading(
-                      context: context,
-                      onDelete: () {},
-                    ),
-                    const SizedBox(height: 5),
-                    Column(
-                      children: List.generate(
-                        2,
-                        (index) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 5),
-                          child: closedServiceCard(context),
-                        ),
+                  )
+              ],
+            ),
+            bottomNavigationBar: state is ListServiceCartSuccess
+                ? Card(
+                    color: Theme.of(context).colorScheme.onBackground,
+                    elevation: 50,
+                    margin: EdgeInsets.zero,
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Get.to(() => const TransactionPage());
+                        },
+                        child: const Text('Pilih Layanan'),
                       ),
                     ),
-                  ],
-                )
-              ],
-            );
-          },
-        ),
-      ),
-      bottomNavigationBar: Card(
-        color: Theme.of(context).colorScheme.onBackground,
-        elevation: 50,
-        margin: EdgeInsets.zero,
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: ElevatedButton(
-            onPressed: () {
-              Get.to(() => const TransactionPage());
-            },
-            child: const Text('Pilih Layanan'),
-          ),
-        ),
-      ),
+                  )
+                : null);
+      },
     );
   }
 
@@ -148,7 +156,10 @@ class _ServiceCartPageState extends State<ServiceCartPage> {
     );
   }
 
-  ListTile closedServiceCard(BuildContext context) {
+  ListTile closedServiceCard(
+    BuildContext context,
+    ServiceCartModel model,
+  ) {
     return ListTile(
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -157,19 +168,19 @@ class _ServiceCartPageState extends State<ServiceCartPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Perawatan Rambut',
+                model.kategoriLayanan,
                 style: Theme.of(context).textTheme.titleMedium!.copyWith(
                       color: Theme.of(context).colorScheme.primary,
                     ),
               ),
               Text(
-                'Hair Cut',
+                model.layanan,
                 style: Theme.of(context).textTheme.titleSmall!,
               ),
             ],
           ),
           Text(
-            20000.convertToIdr(),
+            model.harga.convertToIdr(),
             style: Theme.of(context).textTheme.titleSmall!.copyWith(
                   color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.w700,
@@ -186,11 +197,11 @@ class _ServiceCartPageState extends State<ServiceCartPage> {
 
   RadioListTile<int> serviceCartRadio({
     required BuildContext context,
-    required CartModel model,
+    required ServiceCartModel model,
     required int selectedValue,
     void Function()? onDelete,
   }) {
-    final isSelected = selectedValue == model.id;
+    final isSelected = selectedValue == model.idKeranjangLayanan;
     return RadioListTile<int>(
       contentPadding: const EdgeInsets.symmetric(horizontal: 10),
       title: Row(
@@ -202,7 +213,7 @@ class _ServiceCartPageState extends State<ServiceCartPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  model.title,
+                  model.kategoriLayanan,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.titleMedium!.copyWith(
@@ -212,7 +223,7 @@ class _ServiceCartPageState extends State<ServiceCartPage> {
                       ),
                 ),
                 Text(
-                  model.desc,
+                  model.layanan,
                   style: Theme.of(context).textTheme.titleSmall!,
                 ),
               ],
@@ -220,20 +231,20 @@ class _ServiceCartPageState extends State<ServiceCartPage> {
           ),
           const SizedBox(width: 10),
           Text(
-            model.price.convertToIdr(),
+            model.harga.convertToIdr(),
             style: Theme.of(context).textTheme.titleSmall!.copyWith(
                   color: Theme.of(context).colorScheme.primary,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.normal,
                 ),
           ),
           const SizedBox(width: 5),
-          InkWell(
-            onTap: onDelete,
-            child: const Icon(FluentIcons.delete_12_regular),
-          )
+          // InkWell(
+          //   onTap: onDelete,
+          //   child: const Icon(FluentIcons.delete_12_regular),
+          // )
         ],
       ),
-      value: model.id,
+      value: model.idKeranjangLayanan,
       groupValue: selectedValue,
       tileColor: isSelected
           ? Theme.of(context).colorScheme.background

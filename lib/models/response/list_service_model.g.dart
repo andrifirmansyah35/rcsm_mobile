@@ -17,6 +17,7 @@ ListServiceModel _$ListServiceModelFromJson(Map<String, dynamic> json) =>
 
 ServiceModel _$ServiceModelFromJson(Map<String, dynamic> json) => ServiceModel(
       id: json['id'] as int,
+      kategoriLayananId: json['kategori_layanan_id'] as int,
       nama: json['nama'] as String,
       slug: json['slug'] as String,
       harga: json['harga'] as String,

@@ -29,7 +29,7 @@ class ListServiceModel extends Equatable {
 @JsonSerializable(createToJson: false)
 class ServiceModel extends Equatable {
   final int id;
-  // final String kategoriLayananId;
+  final int kategoriLayananId;
   final String nama;
   final String slug;
   final String harga;
@@ -38,7 +38,7 @@ class ServiceModel extends Equatable {
 
   const ServiceModel({
     required this.id,
-    // required this.kategoriLayananId,
+    required this.kategoriLayananId,
     required this.nama,
     required this.slug,
     required this.harga,
@@ -52,7 +52,7 @@ class ServiceModel extends Equatable {
   @override
   List<Object?> get props => [
         id,
-        // kategoriLayananId,
+        kategoriLayananId,
         nama,
         slug,
         harga,
