@@ -3,6 +3,7 @@ import 'package:mobile_app/cubit/add_service_cart_cubit.dart';
 import 'package:mobile_app/cubit/list_service_cart_cubit.dart';
 import 'package:mobile_app/cubit/list_service_cubit.dart';
 import 'package:mobile_app/cubit/login_cubit.dart';
+import 'package:mobile_app/cubit/schedule_check_cubit.dart';
 import 'package:mobile_app/cubit/service_category_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -19,5 +20,6 @@ class AppInjector {
     sl.registerFactory(() => ListServiceCubit());
     sl.registerFactory(() => ListServiceCartCubit());
     sl.registerFactory(() => AddServiceCartCubit());
+    sl.registerFactory(() => ScheduleCheckCubit());
   }
 }

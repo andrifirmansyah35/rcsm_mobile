@@ -1,34 +1,13 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:mobile_app/app/app_injector.dart';
 import 'package:mobile_app/common/extensions.dart';
+import 'package:mobile_app/cubit/schedule_check_cubit.dart';
+import 'package:mobile_app/models/request/schedule_check_body.dart';
+import 'package:mobile_app/models/response/schedule_check_model.dart';
 import 'package:mobile_app/pages/schedule_cart_page.dart';
-
-class TimeService {
-  final int id;
-  final String name;
-  final bool isAvailable;
-
-  const TimeService({
-    required this.id,
-    required this.name,
-    required this.isAvailable,
-  });
-}
-
-const listTime = [
-  TimeService(id: 1, name: '09:00 - 10:00', isAvailable: true),
-  TimeService(id: 12, name: '10:00 - 11:00', isAvailable: true),
-  TimeService(id: 2, name: '11:00 - 12:00', isAvailable: true),
-  TimeService(id: 3, name: '12:00 - 13:00', isAvailable: true),
-  TimeService(id: 4, name: '13:00 - 14:00', isAvailable: true),
-  TimeService(id: 5, name: '14:00 - 15:00', isAvailable: false),
-  TimeService(id: 6, name: '15:00 - 16:00', isAvailable: true),
-  TimeService(id: 7, name: '16:00 - 17:00', isAvailable: true),
-  TimeService(id: 8, name: '17:00 - 18:00', isAvailable: false),
-  TimeService(id: 9, name: '18:00 - 19:00', isAvailable: true),
-  TimeService(id: 10, name: '19:00 - 20:00', isAvailable: false),
-];
 
 class ScheduleCheckPage extends StatefulWidget {
   const ScheduleCheckPage({Key? key}) : super(key: key);
@@ -38,6 +17,8 @@ class ScheduleCheckPage extends StatefulWidget {
 }
 
 class _ScheduleCheckPageState extends State<ScheduleCheckPage> {
+  final scheduleCheckCubit = sl<ScheduleCheckCubit>();
+
   final selectedDate = ValueNotifier<DateTime?>(null);
   final isChecking = ValueNotifier<bool>(false);
   final scrollController = ScrollController();
@@ -84,11 +65,52 @@ class _ScheduleCheckPageState extends State<ScheduleCheckPage> {
                       ? null
                       : () {
                           isChecking.value = true;
+                          scheduleCheckCubit.fetchData(
+                            ScheduleCheckBody(
+                              tahun: selectedDate.value!.year.toString(),
+                              bulan: selectedDate.value!.month.toString(),
+                              hari: selectedDate.value!.day.toString(),
+                            ),
+                          );
                         },
-                  child: const Text('Cek Jadwal Operasi Layanan'),
+                  child: const Text('Cek Jadwal'),
                 ),
                 const SizedBox(height: 10),
-                listScheduleSection(dateValue)
+                ValueListenableBuilder(
+                    valueListenable: isChecking,
+                    builder: (context, checkingValue, _) {
+                      if (!checkingValue) {
+                        return const SizedBox();
+                      }
+
+                      return BlocBuilder<ScheduleCheckCubit,
+                          ScheduleCheckState>(
+                        bloc: scheduleCheckCubit,
+                        builder: (context, state) {
+                          if (state is ScheduleCheckSuccess &&
+                              selectedDate.value != null) {
+                            final data = state.response;
+
+                            return listTimeContainer(
+                              context,
+                              dateValue,
+                              data,
+                            );
+                          } else {
+                            return SizedBox(
+                              height: 300,
+                              child: Center(
+                                child: state is ScheduleCheckFailed
+                                    ? Text(state.message)
+                                    : state is ScheduleCheckLoading
+                                        ? const CircularProgressIndicator()
+                                        : const SizedBox(),
+                              ),
+                            );
+                          }
+                        },
+                      );
+                    })
               ],
             );
           },
@@ -114,6 +136,117 @@ class _ScheduleCheckPageState extends State<ScheduleCheckPage> {
     );
   }
 
+  Column listTimeContainer(
+    BuildContext context,
+    DateTime? dateValue,
+    List<OperasionalModel> data,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Pilih Jam Layanan Operasi',
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
+        const SizedBox(height: 5),
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.background,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              RichText(
+                textAlign: TextAlign.left,
+                text: TextSpan(
+                  text: 'Jadwal Operasi ',
+                  style: Theme.of(context).textTheme.bodySmall!,
+                  children: <TextSpan>[
+                    TextSpan(
+                      text: dateValue!.formatToString(),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 5),
+              GridView(
+                controller: scrollController,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4,
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 5,
+                  mainAxisExtent: 35,
+                ),
+                shrinkWrap: true,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 3,
+                  vertical: 8,
+                ),
+                children: List.generate(
+                  data.length,
+                  (index) {
+                    return scheduleTimeCard(
+                      data[index],
+                      context,
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.all(15),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.onBackground,
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          height: 25,
+                          width: 25,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.onError,
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('Dipesan')
+                      ],
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          height: 25,
+                          width: 25,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.tertiary,
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('Tersedia')
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   Padding datePickButton(DateTime? dateValue) {
     return Padding(
       padding: const EdgeInsets.all(10),
@@ -134,127 +267,12 @@ class _ScheduleCheckPageState extends State<ScheduleCheckPage> {
     );
   }
 
-  ValueListenableBuilder<bool> listScheduleSection(DateTime? dateValue) {
-    return ValueListenableBuilder(
-      valueListenable: isChecking,
-      builder: (context, isCheckingValue, _) {
-        if (isCheckingValue) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'Pilih Jam Layanan Operasi',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const SizedBox(height: 5),
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.background,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    RichText(
-                      textAlign: TextAlign.left,
-                      text: TextSpan(
-                        text: 'Jadwal Operasi ',
-                        style: Theme.of(context).textTheme.bodySmall!,
-                        children: <TextSpan>[
-                          TextSpan(
-                            text: dateValue!.formatToString(),
-                            style:
-                                Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    GridView(
-                      controller: scrollController,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 4,
-                        mainAxisSpacing: 10,
-                        crossAxisSpacing: 5,
-                        mainAxisExtent: 35,
-                      ),
-                      shrinkWrap: true,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 3,
-                        vertical: 8,
-                      ),
-                      children: List.generate(
-                        listTime.length,
-                        (index) {
-                          return scheduleTimeCard(
-                            listTime[index],
-                            context,
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Container(
-                      padding: const EdgeInsets.all(15),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.onBackground,
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                height: 25,
-                                width: 25,
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.onError,
-                                  borderRadius: BorderRadius.circular(50),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              const Text('Dipesan')
-                            ],
-                          ),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                height: 25,
-                                width: 25,
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.tertiary,
-                                  borderRadius: BorderRadius.circular(50),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              const Text('Tersedia')
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          );
-        }
-
-        return const SizedBox();
-      },
-    );
-  }
-
-  Card scheduleTimeCard(TimeService model, BuildContext context) {
+  Card scheduleTimeCard(
+    OperasionalModel model,
+    BuildContext context,
+  ) {
     return Card(
-      color: model.isAvailable
+      color: model.status
           ? Theme.of(context).colorScheme.tertiary
           : Theme.of(context).colorScheme.onError,
       margin: EdgeInsets.zero,
@@ -263,7 +281,7 @@ class _ScheduleCheckPageState extends State<ScheduleCheckPage> {
       ),
       child: InkWell(
         onTap: () {
-          if (model.isAvailable) {
+          if (model.status) {
             Get.dialog(addScheduleDialog(model));
           } else {
             Get.closeAllSnackbars();
@@ -277,7 +295,7 @@ class _ScheduleCheckPageState extends State<ScheduleCheckPage> {
         },
         child: Center(
           child: Text(
-            model.name,
+            '${model.waktuMulai} - ${model.waktuSelesai}',
             style: Theme.of(context).textTheme.bodySmall!.copyWith(
                   color: Theme.of(context).colorScheme.onPrimary,
                 ),
@@ -287,7 +305,7 @@ class _ScheduleCheckPageState extends State<ScheduleCheckPage> {
     );
   }
 
-  Dialog addScheduleDialog(TimeService model) {
+  Dialog addScheduleDialog(OperasionalModel model) {
     return Dialog(
       child: Padding(
         padding: const EdgeInsets.symmetric(
@@ -321,7 +339,7 @@ class _ScheduleCheckPageState extends State<ScheduleCheckPage> {
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   TextSpan(
-                    text: model.name,
+                    text: '${model.waktuMulai} - ${model.waktuSelesai}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
