@@ -6,6 +6,7 @@ import 'package:mobile_app/app/app_injector.dart';
 import 'package:mobile_app/common/constants.dart';
 import 'package:mobile_app/cubit/service_category_cubit.dart';
 import 'package:mobile_app/models/response/service_category_model.dart';
+import 'package:mobile_app/pages/detail_service_category_page.dart';
 import 'package:mobile_app/pages/reservation_page.dart';
 import 'package:mobile_app/pages/schedule_check_page.dart';
 import 'package:mobile_app/pages/service_category_page.dart';
@@ -146,7 +147,16 @@ class _HomePageState extends State<HomePage> {
           padding: EdgeInsets.zero,
           controller: scrollController,
           itemBuilder: (context, index) {
-            return ServiceCategoryCard(data: data[index]);
+            return ServiceCategoryCard(
+              data: data[index],
+              onTap: () {
+                Get.to(
+                  () => DetailServiceCategoryPage(
+                    data: data[index],
+                  ),
+                );
+              },
+            );
           },
         ),
       ],

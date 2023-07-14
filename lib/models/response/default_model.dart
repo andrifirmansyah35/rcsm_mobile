@@ -3,7 +3,6 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'default_model.g.dart';
 
-
 @JsonSerializable(createToJson: false)
 class DefaultResponseModel extends Equatable {
   final String message;

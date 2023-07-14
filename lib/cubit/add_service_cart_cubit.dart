@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:mobile_app/app/app_injector.dart';
 import 'package:mobile_app/common/constants.dart';
 import 'package:mobile_app/models/request/slug_body.dart';
-import 'package:mobile_app/models/response/alert_success_model.dart';
+import 'package:mobile_app/models/response/add_service_cart_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 part 'add_service_cart_state.dart';
@@ -32,7 +32,7 @@ class AddServiceCartCubit extends Cubit<AddServiceCartState> {
       );
       log(response.body);
       if (response.statusCode == 200) {
-        final result = AlertSuccessModel.fromJson(
+        final result = AddServiceCartModel.fromJson(
           jsonDecode(response.body),
         );
         if (result.message == 'success') {

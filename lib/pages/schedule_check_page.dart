@@ -8,10 +8,17 @@ import 'package:mobile_app/cubit/add_schedule_cart_cubit.dart';
 import 'package:mobile_app/cubit/schedule_check_cubit.dart';
 import 'package:mobile_app/models/request/schedule_check_body.dart';
 import 'package:mobile_app/models/response/schedule_check_model.dart';
+import 'package:mobile_app/models/response/service_cart_model.dart';
 import 'package:mobile_app/pages/schedule_cart_page.dart';
+import 'package:mobile_app/pages/transaction_page.dart';
 
 class ScheduleCheckPage extends StatefulWidget {
-  const ScheduleCheckPage({Key? key}) : super(key: key);
+  const ScheduleCheckPage({
+    this.serviceCartModel,
+    Key? key,
+  }) : super(key: key);
+
+  final ServiceCartModel? serviceCartModel;
 
   @override
   State<ScheduleCheckPage> createState() => _ScheduleCheckPageState();
@@ -70,7 +77,6 @@ class _ScheduleCheckPageState extends State<ScheduleCheckPage> {
           );
         }
         if (state is AddScheduleCartSuccess) {
-          onCheckSchedule();
           Get.back();
           Get.snackbar(
             'Berhasil Menambah Operasional',
@@ -78,6 +84,17 @@ class _ScheduleCheckPageState extends State<ScheduleCheckPage> {
             backgroundColor: Theme.of(context).colorScheme.primary,
             colorText: Theme.of(context).colorScheme.onPrimary,
           );
+          if (widget.serviceCartModel != null) {
+            Get.to(
+              TransactionPage(
+                selectedService: widget.serviceCartModel,
+                scheduleCartModel: state.response.data,
+              ),
+              preventDuplicates: false,
+            );
+          } else {
+            onCheckSchedule();
+          }
         }
       },
       child: Scaffold(

@@ -3,15 +3,21 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:mobile_app/app/app_injector.dart';
 import 'package:mobile_app/cubit/service_category_cubit.dart';
+import 'package:mobile_app/models/response/schedule_cart_model.dart';
+import 'package:mobile_app/pages/detail_service_category_page.dart';
 import 'package:mobile_app/widgets/service_category_card.dart';
 
 class ServiceCategoryPage extends StatefulWidget {
-  const ServiceCategoryPage({Key? key}) : super(key: key);
+  const ServiceCategoryPage({
+    Key? key,
+    this.scheduleCartModel,
+  }) : super(key: key);
+
+  final ScheduleCartModel? scheduleCartModel;
 
   @override
   State<ServiceCategoryPage> createState() => _ServiceCategoryPageState();
 }
-
 
 class _ServiceCategoryPageState extends State<ServiceCategoryPage> {
   final serviceCategoryCubit = sl<ServiceCategoryCubit>();
@@ -47,6 +53,14 @@ class _ServiceCategoryPageState extends State<ServiceCategoryPage> {
                         state.response.length,
                         (index) => ServiceCategoryCard(
                           data: state.response[index],
+                          onTap: () {
+                            Get.to(
+                              () => DetailServiceCategoryPage(
+                                data: state.response[index],
+                                scheduleCartModel: widget.scheduleCartModel,
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ),

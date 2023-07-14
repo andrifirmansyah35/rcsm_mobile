@@ -5,12 +5,19 @@ import 'package:get/get.dart';
 import 'package:mobile_app/app/app_injector.dart';
 import 'package:mobile_app/common/extensions.dart';
 import 'package:mobile_app/cubit/list_service_cart_cubit.dart';
+import 'package:mobile_app/models/response/schedule_cart_model.dart';
 import 'package:mobile_app/models/response/service_cart_model.dart';
+import 'package:mobile_app/pages/service_category_page.dart';
 import 'package:mobile_app/pages/transaction_page.dart';
 import 'package:mobile_app/widgets/error_indicator.dart';
 
 class ServiceCartPage extends StatefulWidget {
-  const ServiceCartPage({Key? key}) : super(key: key);
+  const ServiceCartPage({
+    Key? key,
+    this.scheduleCartModel,
+  }) : super(key: key);
+
+  final ScheduleCartModel? scheduleCartModel;
 
   @override
   State<ServiceCartPage> createState() => _ServiceCartPageState();
@@ -36,25 +43,28 @@ class _ServiceCartPageState extends State<ServiceCartPage> {
       bloc: listServiceCartCubit,
       listener: (context, state) {
         if (state is ListServiceCartSuccess) {
-          selectedServiceId.value =
-              state.response.dataKeranjangLayananOpen.first.idKeranjangLayanan;
+          if (state.response.dataKeranjangLayananOpen.isNotEmpty) {
+            selectedServiceId.value = state
+                .response.dataKeranjangLayananOpen.first.idKeranjangLayanan;
+          }
         }
       },
       builder: (context, state) {
         return Scaffold(
-            appBar: AppBar(
-              title: const Text('Keranjang Layanan'),
-            ),
-            body: ListView(
-              padding: const EdgeInsets.all(12),
-              children: [
-                if (state is ListServiceCartSuccess)
-                  ValueListenableBuilder<int>(
-                    valueListenable: selectedServiceId,
-                    builder: (context, value, _) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
+          appBar: AppBar(
+            title: const Text('Keranjang Layanan'),
+          ),
+          body: ListView(
+            padding: const EdgeInsets.all(12),
+            children: [
+              if (state is ListServiceCartSuccess)
+                ValueListenableBuilder<int>(
+                  valueListenable: selectedServiceId,
+                  builder: (context, value, _) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (state.response.dataKeranjangLayananOpen.isNotEmpty)
                           Column(
                             children: List.generate(
                               state.response.dataKeranjangLayananOpen.length,
@@ -65,9 +75,34 @@ class _ServiceCartPageState extends State<ServiceCartPage> {
                                 selectedValue: value,
                               ),
                             ),
+                          )
+                        else
+                          SizedBox(
+                            height: Get.height / 2,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Text(
+                                  'Keranjang Layanan kamu masih kosong',
+                                ),
+                                const SizedBox(height: 20),
+                                ElevatedButton(
+                                  child: const Text('Tambah Layanan'),
+                                  onPressed: () {
+                                    Get.to(
+                                      () => ServiceCategoryPage(
+                                        scheduleCartModel:
+                                            widget.scheduleCartModel,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
                           ),
-                          const SizedBox(height: 10),
-                          const Divider(),
+                        const SizedBox(height: 10),
+                        const Divider(),
+                        if (state.response.dataKeranjangClose.isNotEmpty)
                           Column(
                             children: [
                               closedServiceHeading(
@@ -91,52 +126,57 @@ class _ServiceCartPageState extends State<ServiceCartPage> {
                               ),
                             ],
                           )
-                        ],
-                      );
-                    },
-                  )
-                else
-                  SizedBox(
-                    height: Get.height,
-                    child: Center(
-                      child: state is ListServiceCartFailed
-                          ? ErrorIndicator(
-                              message: state.message,
-                            )
-                          : state is ListServiceCartLoading
-                              ? const CircularProgressIndicator()
-                              : const SizedBox(),
-                    ),
-                  )
-              ],
-            ),
-            bottomNavigationBar: state is ListServiceCartSuccess
-                ? Card(
-                    color: Theme.of(context).colorScheme.onBackground,
-                    elevation: 50,
-                    margin: EdgeInsets.zero,
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          final selectedService = state
-                              .response.dataKeranjangLayananOpen
-                              .firstWhere(
-                            (element) =>
-                                element.idKeranjangLayanan ==
-                                selectedServiceId.value,
-                          );
-                          Get.to(
-                            () => TransactionPage(
-                              selectedService: selectedService,
-                            ),
-                          );
-                        },
-                        child: const Text('Pilih Layanan'),
-                      ),
-                    ),
-                  )
-                : null);
+                      ],
+                    );
+                  },
+                )
+              else
+                SizedBox(
+                  height: Get.height,
+                  child: Center(
+                    child: state is ListServiceCartFailed
+                        ? ErrorIndicator(
+                            message: state.message,
+                          )
+                        : state is ListServiceCartLoading
+                            ? const CircularProgressIndicator()
+                            : const SizedBox(),
+                  ),
+                )
+            ],
+          ),
+          bottomNavigationBar: state is ListServiceCartSuccess
+              ? Card(
+                  color: Theme.of(context).colorScheme.onBackground,
+                  elevation: 50,
+                  margin: EdgeInsets.zero,
+                  child: state.response.dataKeranjangLayananOpen.isNotEmpty
+                      ? Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              final selectedService = state
+                                  .response.dataKeranjangLayananOpen
+                                  .firstWhere(
+                                (element) =>
+                                    element.idKeranjangLayanan ==
+                                    selectedServiceId.value,
+                              );
+                              Get.to(
+                                () => TransactionPage(
+                                  selectedService: selectedService,
+                                  scheduleCartModel: widget.scheduleCartModel,
+                                ),
+                                preventDuplicates: false,
+                              );
+                            },
+                            child: const Text('Pilih Layanan'),
+                          ),
+                        )
+                      : null,
+                )
+              : null,
+        );
       },
     );
   }

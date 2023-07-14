@@ -12,7 +12,7 @@ class AddServiceCartInitial extends AddServiceCartState {}
 class AddServiceCartLoading extends AddServiceCartState {}
 
 class AddServiceCartSuccess extends AddServiceCartState {
-  final AlertSuccessModel response;
+  final AddServiceCartModel response;
 
   const AddServiceCartSuccess(this.response);
 }

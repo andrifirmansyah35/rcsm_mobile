@@ -6,18 +6,23 @@ import 'package:mobile_app/app/app_injector.dart';
 import 'package:mobile_app/common/constants.dart';
 import 'package:mobile_app/cubit/add_service_cart_cubit.dart';
 import 'package:mobile_app/cubit/list_service_cubit.dart';
+import 'package:mobile_app/models/response/schedule_cart_model.dart';
 import 'package:mobile_app/models/response/service_category_model.dart';
 import 'package:mobile_app/pages/service_cart_page.dart';
+import 'package:mobile_app/pages/transaction_page.dart';
 import 'package:mobile_app/widgets/error_indicator.dart';
 import 'package:mobile_app/widgets/service_card.dart';
 
 class DetailServiceCategoryPage extends StatefulWidget {
   const DetailServiceCategoryPage({
     required this.data,
+    this.scheduleCartModel,
     Key? key,
   }) : super(key: key);
 
   final ServiceCategoryModel data;
+
+  final ScheduleCartModel? scheduleCartModel;
 
   @override
   State<DetailServiceCategoryPage> createState() =>
@@ -63,6 +68,16 @@ class _DetailServiceCategoryState extends State<DetailServiceCategoryPage> {
             backgroundColor: Theme.of(context).colorScheme.onPrimary,
             colorText: Theme.of(context).colorScheme.primary,
           );
+
+          if (widget.scheduleCartModel != null) {
+            Get.to(
+              TransactionPage(
+                selectedService: state.response.data,
+                scheduleCartModel: widget.scheduleCartModel,
+              ),
+              preventDuplicates: false,
+            );
+          }
         }
       },
       child: Scaffold(

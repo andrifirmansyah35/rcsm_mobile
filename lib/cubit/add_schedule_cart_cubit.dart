@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:mobile_app/app/app_injector.dart';
 import 'package:mobile_app/common/constants.dart';
 import 'package:mobile_app/models/request/schedule_cart_body.dart';
-import 'package:mobile_app/models/response/default_model.dart';
+import 'package:mobile_app/models/response/add_schedule_cart_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 part 'add_schedule_cart_state.dart';
@@ -32,7 +32,7 @@ class AddScheduleCartCubit extends Cubit<AddScheduleCartState> {
       );
       log(response.body);
       if (response.statusCode == 200) {
-        final result = DefaultResponseModel.fromJson(
+        final result = AddScheduleCartModel.fromJson(
           jsonDecode(response.body),
         );
         if (result.status == 'success') {

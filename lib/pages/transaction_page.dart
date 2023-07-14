@@ -7,16 +7,15 @@ import 'package:mobile_app/models/response/schedule_cart_model.dart';
 import 'package:mobile_app/models/response/service_cart_model.dart';
 import 'package:mobile_app/pages/home_page.dart';
 import 'package:mobile_app/pages/schedule_cart_page.dart';
+import 'package:mobile_app/pages/service_cart_page.dart';
 
 class TransactionPage extends StatefulWidget {
   const TransactionPage({
     this.selectedService,
-    this.isScheduled = false,
     this.scheduleCartModel,
     Key? key,
   }) : super(key: key);
 
-  final bool isScheduled;
   final ServiceCartModel? selectedService;
   final ScheduleCartModel? scheduleCartModel;
 
@@ -57,10 +56,16 @@ class _TransactionPageState extends State<TransactionPage> {
                   ElevatedButton(
                     onPressed: () {
                       // TODO
-                      // Get.offAll(
-                      //   () => const DetailServiceCategoryPage(
-                      //       title: 'Perawatan Rambut', id: 5),
+                      // Get.to(
+                      //   () => ServiceCategoryPage(
+                      //     scheduleCartModel: widget.scheduleCartModel,
+                      //   ),
                       // );
+                      Get.to(
+                        ServiceCartPage(
+                          scheduleCartModel: widget.scheduleCartModel,
+                        ),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.background,
@@ -103,7 +108,11 @@ class _TransactionPageState extends State<TransactionPage> {
                     ),
                   ElevatedButton(
                     onPressed: () {
-                      Get.to(() => const ScheduleCartPage());
+                      Get.to(
+                        () => ScheduleCartPage(
+                          serviceCartModel: widget.selectedService,
+                        ),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.background,
@@ -133,7 +142,8 @@ class _TransactionPageState extends State<TransactionPage> {
         padding: const EdgeInsets.all(10),
         child: ElevatedButton(
           onPressed: () {
-            if (!widget.isScheduled) {
+            if (widget.scheduleCartModel == null ||
+                widget.selectedService == null) {
               Get.snackbar(
                 'Gagal!',
                 'Jadwal Belum dipilih',

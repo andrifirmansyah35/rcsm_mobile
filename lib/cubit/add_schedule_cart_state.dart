@@ -12,7 +12,7 @@ class AddScheduleCartInitial extends AddScheduleCartState {}
 class AddScheduleCartLoading extends AddScheduleCartState {}
 
 class AddScheduleCartSuccess extends AddScheduleCartState {
-  final DefaultResponseModel response;
+  final AddScheduleCartModel response;
 
   const AddScheduleCartSuccess(this.response);
 }

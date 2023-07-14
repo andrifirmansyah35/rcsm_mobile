@@ -6,11 +6,18 @@ import 'package:mobile_app/app/app_injector.dart';
 import 'package:mobile_app/common/extensions.dart';
 import 'package:mobile_app/cubit/list_schedule_cart_cubit.dart';
 import 'package:mobile_app/models/response/schedule_cart_model.dart';
+import 'package:mobile_app/models/response/service_cart_model.dart';
+import 'package:mobile_app/pages/schedule_check_page.dart';
 import 'package:mobile_app/pages/transaction_page.dart';
 import 'package:mobile_app/widgets/error_indicator.dart';
 
 class ScheduleCartPage extends StatefulWidget {
-  const ScheduleCartPage({Key? key}) : super(key: key);
+  const ScheduleCartPage({
+    this.serviceCartModel,
+    Key? key,
+  }) : super(key: key);
+
+  final ServiceCartModel? serviceCartModel;
 
   @override
   State<ScheduleCartPage> createState() => _ScheduleCartPageState();
@@ -33,7 +40,10 @@ class _ScheduleCartPageState extends State<ScheduleCartPage> {
       bloc: listScheduleCartCubit,
       listener: (context, state) {
         if (state is ListScheduleCartSuccess) {
-          selectedSchedule.value = state.response.keranjangOperasiBuka.first.id;
+          if (state.response.keranjangOperasiBuka.isNotEmpty) {
+            selectedSchedule.value =
+                state.response.keranjangOperasiBuka.first.id;
+          }
         }
       },
       builder: (context, state) {
@@ -46,21 +56,24 @@ class _ScheduleCartPageState extends State<ScheduleCartPage> {
           bottomNavigationBar: state is ListScheduleCartSuccess
               ? Padding(
                   padding: const EdgeInsets.all(10),
-                  child: ElevatedButton(
-                    child: const Text('Tambah Operasional'),
-                    onPressed: () {
-                      final schedule =
-                          state.response.keranjangOperasiBuka.firstWhere(
-                        (element) => element.id == selectedSchedule.value,
-                      );
-                      Get.to(
-                        () => TransactionPage(
-                          isScheduled: true,
-                          scheduleCartModel: schedule,
-                        ),
-                      );
-                    },
-                  ),
+                  child: state.response.keranjangOperasiBuka.isNotEmpty
+                      ? ElevatedButton(
+                          child: const Text('Tambah Operasional'),
+                          onPressed: () {
+                            final schedule =
+                                state.response.keranjangOperasiBuka.firstWhere(
+                              (element) => element.id == selectedSchedule.value,
+                            );
+                            Get.to(
+                              () => TransactionPage(
+                                scheduleCartModel: schedule,
+                                selectedService: widget.serviceCartModel,
+                              ),
+                              preventDuplicates: false,
+                            );
+                          },
+                        )
+                      : null,
                 )
               : null,
           body: ListView(
@@ -73,61 +86,90 @@ class _ScheduleCartPageState extends State<ScheduleCartPage> {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Column(
-                          children: List.generate(
-                            state.response.keranjangOperasiBuka.length,
-                            (index) => scheduleRadio(
-                              context: context,
-                              model: state.response.keranjangOperasiBuka[index],
-                              selectedId: selectedSchedule.value,
+                        if (state.response.keranjangOperasiBuka.isNotEmpty)
+                          Column(
+                            children: List.generate(
+                              state.response.keranjangOperasiBuka.length,
+                              (index) => scheduleRadio(
+                                context: context,
+                                model:
+                                    state.response.keranjangOperasiBuka[index],
+                                selectedId: selectedSchedule.value,
+                              ),
+                            ),
+                          )
+                        else
+                          SizedBox(
+                            height: Get.height / 2,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Text(
+                                  'Keranjang Jadwal kamu masih kosong',
+                                ),
+                                const SizedBox(height: 20),
+                                ElevatedButton(
+                                  child: const Text('Tambah Jadwal Baru'),
+                                  onPressed: () {
+                                    Get.to(
+                                      () => ScheduleCheckPage(
+                                        serviceCartModel:
+                                            widget.serviceCartModel,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
                             ),
                           ),
-                        ),
                         const SizedBox(height: 5),
                         const Divider(thickness: 8),
                         const SizedBox(height: 5),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 15),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Tidak Dapat Diproses',
-                                    style:
-                                        Theme.of(context).textTheme.titleSmall,
-                                  ),
-                                  OutlinedButton(
-                                    onPressed: () {},
-                                    style: OutlinedButton.styleFrom(
-                                      foregroundColor:
-                                          Theme.of(context).colorScheme.primary,
-                                      textStyle: Theme.of(context)
+                        if (state.response.keranjangOperasiTerblokir.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 15),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Tidak Dapat Diproses',
+                                      style: Theme.of(context)
                                           .textTheme
-                                          .labelMedium,
+                                          .titleSmall,
                                     ),
-                                    child: const Text(
-                                      'Hapus',
-                                    ),
-                                  )
-                                ],
-                              ),
-                              Column(
-                                children: List.generate(
-                                  state.response.keranjangOperasiTerblokir
-                                      .length,
-                                  (index) => expiredScheduleCard(
-                                      context,
-                                      state.response
-                                          .keranjangOperasiTerblokir[index]),
+                                    OutlinedButton(
+                                      onPressed: () {},
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                        textStyle: Theme.of(context)
+                                            .textTheme
+                                            .labelMedium,
+                                      ),
+                                      child: const Text(
+                                        'Hapus',
+                                      ),
+                                    )
+                                  ],
                                 ),
-                              )
-                            ],
-                          ),
-                        )
+                                Column(
+                                  children: List.generate(
+                                    state.response.keranjangOperasiTerblokir
+                                        .length,
+                                    (index) => expiredScheduleCard(
+                                        context,
+                                        state.response
+                                            .keranjangOperasiTerblokir[index]),
+                                  ),
+                                )
+                              ],
+                            ),
+                          )
                       ],
                     );
                   },
