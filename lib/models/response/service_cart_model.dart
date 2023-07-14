@@ -26,6 +26,7 @@ class ListServiceCartModel extends Equatable {
 @JsonSerializable(createToJson: false)
 class ServiceCartModel extends Equatable {
   final int idKeranjangLayanan;
+  final int idLayanan;
   final bool status;
   final String layanan;
   final String kategoriLayanan;
@@ -34,9 +35,10 @@ class ServiceCartModel extends Equatable {
 
   const ServiceCartModel({
     required this.idKeranjangLayanan,
+    required this.idLayanan,
     required this.status,
     required this.layanan,
-    required this.gambarKategoriLayanan, 
+    required this.gambarKategoriLayanan,
     required this.kategoriLayanan,
     required this.harga,
   });
@@ -47,6 +49,7 @@ class ServiceCartModel extends Equatable {
   @override
   List<Object?> get props => [
         idKeranjangLayanan,
+        idLayanan,
         status,
         gambarKategoriLayanan,
         layanan,

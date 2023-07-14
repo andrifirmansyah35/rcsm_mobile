@@ -137,6 +137,7 @@ class _ServiceCartPageState extends State<ServiceCartPage> {
                     child: state is ListServiceCartFailed
                         ? ErrorIndicator(
                             message: state.message,
+                            onRefresh: refresh,
                           )
                         : state is ListServiceCartLoading
                             ? const CircularProgressIndicator()

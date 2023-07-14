@@ -26,6 +26,7 @@ class ListScheduleCartModel extends Equatable {
 @JsonSerializable(createToJson: false)
 class ScheduleCartModel extends Equatable {
   final int id;
+  final int idOperasi;
   final bool status;
   final int userId;
   final String userNama;
@@ -34,6 +35,7 @@ class ScheduleCartModel extends Equatable {
 
   const ScheduleCartModel({
     required this.id,
+    required this.idOperasi, 
     required this.status,
     required this.userId,
     required this.userNama,
@@ -47,6 +49,7 @@ class ScheduleCartModel extends Equatable {
   @override
   List<Object?> get props => [
         id,
+        idOperasi,
         status,
         userId,
         userNama,

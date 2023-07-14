@@ -21,6 +21,7 @@ ListServiceCartModel _$ListServiceCartModelFromJson(
 ServiceCartModel _$ServiceCartModelFromJson(Map<String, dynamic> json) =>
     ServiceCartModel(
       idKeranjangLayanan: json['id_keranjang_layanan'] as int,
+      idLayanan: json['id_layanan'] as int,
       status: json['status'] as bool,
       layanan: json['layanan'] as String,
       gambarKategoriLayanan: json['gambar_kategori_layanan'] as String,

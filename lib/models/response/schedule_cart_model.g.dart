@@ -21,6 +21,7 @@ ListScheduleCartModel _$ListScheduleCartModelFromJson(
 ScheduleCartModel _$ScheduleCartModelFromJson(Map<String, dynamic> json) =>
     ScheduleCartModel(
       id: json['id'] as int,
+      idOperasi: json['id_operasi'] as int,
       status: json['status'] as bool,
       userId: json['user_id'] as int,
       userNama: json['user_nama'] as String,

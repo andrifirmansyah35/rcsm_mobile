@@ -1,8 +1,12 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:mobile_app/app/app_injector.dart';
 import 'package:mobile_app/common/constants.dart';
 import 'package:mobile_app/common/extensions.dart';
+import 'package:mobile_app/cubit/add_reservation_cubit.dart';
+import 'package:mobile_app/models/request/reservation_body.dart';
 import 'package:mobile_app/models/response/schedule_cart_model.dart';
 import 'package:mobile_app/models/response/service_cart_model.dart';
 import 'package:mobile_app/pages/home_page.dart';
@@ -24,143 +28,176 @@ class TransactionPage extends StatefulWidget {
 }
 
 class _TransactionPageState extends State<TransactionPage> {
+  final addReservationCubit = sl<AddReservationCubit>();
+
+  void bookingReservation() {
+    addReservationCubit.fetchData(ReservationBody(
+      idLayanan: widget.selectedService!.idLayanan.toString(),
+      idOperasi: widget.scheduleCartModel!.idOperasi.toString(),
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Buat Transaksi'),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        child: Column(
-          children: [
-            transactionHeader(context),
-            const SizedBox(height: 5),
-            const Divider(
-              thickness: 5,
+    return BlocConsumer<AddReservationCubit, AddReservationState>(
+      bloc: addReservationCubit,
+      listener: (context, state) {
+        if (state is AddReservationLoading) {
+          Get.dialog(
+            const Center(
+              child: CircularProgressIndicator(),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'Layanan',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  if (widget.selectedService != null)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                      child: serviceCartDetail(context),
-                    ),
-                  ElevatedButton(
-                    onPressed: () {
-                      // TODO
-                      // Get.to(
-                      //   () => ServiceCategoryPage(
-                      //     scheduleCartModel: widget.scheduleCartModel,
-                      //   ),
-                      // );
-                      Get.to(
-                        ServiceCartPage(
-                          scheduleCartModel: widget.scheduleCartModel,
+            barrierDismissible: false,
+          );
+        }
+        if (state is AddReservationFailed) {
+          Get.back();
+          Get.snackbar(
+            'Proses Reservasi Gagal!',
+            state.message,
+            backgroundColor: Theme.of(context).colorScheme.error,
+          );
+        }
+        if (state is AddReservationSuccess) {
+          Get.back();
+          Get.snackbar(
+            'Berhasil Memproses Reservasi',
+            state.response.message,
+            backgroundColor: Theme.of(context).colorScheme.background,
+          );
+
+          Get.offAll(() => const HomePage());
+        }
+      },
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Buat Transaksi'),
+          ),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Column(
+              children: [
+                transactionHeader(context),
+                const SizedBox(height: 5),
+                const Divider(
+                  thickness: 5,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'Layanan',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      if (widget.selectedService != null)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          child: serviceCartDetail(context),
                         ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.background,
-                      foregroundColor:
-                          Theme.of(context).colorScheme.inverseSurface,
-                    ),
-                    child: const Row(
-                      children: [
-                        Icon(FluentIcons.service_bell_16_regular),
-                        Expanded(
-                          child: Text(
-                            'Pilih Layanan',
-                            textAlign: TextAlign.center,
-                          ),
+                      ElevatedButton(
+                        onPressed: () {
+                          Get.to(
+                            ServiceCartPage(
+                              scheduleCartModel: widget.scheduleCartModel,
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.background,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.inverseSurface,
                         ),
-                        Icon(FluentIcons.chevron_right_16_filled)
-                      ],
-                    ),
+                        child: const Row(
+                          children: [
+                            Icon(FluentIcons.service_bell_16_regular),
+                            Expanded(
+                              child: Text(
+                                'Pilih Layanan',
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            Icon(FluentIcons.chevron_right_16_filled)
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 10),
+                const Divider(thickness: 2),
+                const SizedBox(height: 5),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'Jadwal Operasi',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 8),
+                      if (widget.scheduleCartModel != null)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 5),
+                          child: scheduleCard(context),
+                        ),
+                      ElevatedButton(
+                        onPressed: () {
+                          Get.to(
+                            () => ScheduleCartPage(
+                              serviceCartModel: widget.selectedService,
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.background,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.inverseSurface,
+                        ),
+                        child: const Row(
+                          children: [
+                            Icon(Icons.calendar_month),
+                            Expanded(
+                              child: Text(
+                                'Pilih Jadwal Operasi Layanan',
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            Icon(FluentIcons.chevron_right_16_filled)
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 10),
-            const Divider(thickness: 2),
-            const SizedBox(height: 5),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'Jadwal Operasi',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  if (widget.scheduleCartModel != null)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 5),
-                      child: scheduleCard(context),
-                    ),
-                  ElevatedButton(
-                    onPressed: () {
-                      Get.to(
-                        () => ScheduleCartPage(
-                          serviceCartModel: widget.selectedService,
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.background,
-                      foregroundColor:
-                          Theme.of(context).colorScheme.inverseSurface,
-                    ),
-                    child: const Row(
-                      children: [
-                        Icon(Icons.calendar_month),
-                        Expanded(
-                          child: Text(
-                            'Pilih Jadwal Operasi Layanan',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        Icon(FluentIcons.chevron_right_16_filled)
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+          ),
+          bottomNavigationBar: Padding(
+            padding: const EdgeInsets.all(10),
+            child: ElevatedButton(
+              onPressed: () {
+                if (widget.scheduleCartModel == null ||
+                    widget.selectedService == null) {
+                  Get.snackbar(
+                    'Gagal!',
+                    'Data Reservasi belum lengkap',
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                  );
+                } else {
+                  bookingReservation();
+                }
+              },
+              child: const Text('Booking'),
             ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(10),
-        child: ElevatedButton(
-          onPressed: () {
-            if (widget.scheduleCartModel == null ||
-                widget.selectedService == null) {
-              Get.snackbar(
-                'Gagal!',
-                'Jadwal Belum dipilih',
-                backgroundColor: Theme.of(context).colorScheme.error,
-              );
-            } else {
-              Get.snackbar(
-                'Berhasil!',
-                'Reservasi berhasil di proses',
-                backgroundColor: Theme.of(context).colorScheme.background,
-              );
-              Get.to(() => const HomePage());
-            }
-          },
-          child: const Text('Booking'),
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
