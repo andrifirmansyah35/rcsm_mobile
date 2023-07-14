@@ -1,8 +1,10 @@
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:mobile_app/app/app_injector.dart';
 import 'package:mobile_app/common/constants.dart';
+import 'package:mobile_app/cubit/add_service_cart_cubit.dart';
 import 'package:mobile_app/cubit/list_service_cubit.dart';
 import 'package:mobile_app/models/response/service_category_model.dart';
 import 'package:mobile_app/pages/service_cart_page.dart';
@@ -24,6 +26,7 @@ class DetailServiceCategoryPage extends StatefulWidget {
 
 class _DetailServiceCategoryState extends State<DetailServiceCategoryPage> {
   final listServiceCubit = sl<ListServiceCubit>();
+  final addServiceCartCubit = sl<AddServiceCartCubit>();
 
   void refresh() {
     listServiceCubit.fetchData(widget.data.slug);
@@ -37,55 +40,102 @@ class _DetailServiceCategoryState extends State<DetailServiceCategoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Kategori Layanan'),
-      ),
-      body: RefreshIndicator(
-        onRefresh: () async => refresh(),
-        child: BlocBuilder<ListServiceCubit, ListServiceState>(
-          bloc: listServiceCubit,
-          builder: (context, state) {
-            return ListView(
-              children: [
-                serviceCategoryHeader(context),
-                const Divider(thickness: 5, height: 5),
-                const SizedBox(height: 5),
-                if (state is ListServiceSuccess)
-                  Column(
-                    children: List.generate(
-                      state.response.length,
-                      (index) => ServiceCard(
-                        data: state.response[index],
-                        margin: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 5),
-                        onConfirm: () {
-                          // TODO: Tambah keranjang
-                          Get.back();
-                          Get.to(() => const ServiceCartPage());
-                        },
+    return BlocListener<AddServiceCartCubit, AddServiceCartState>(
+      bloc: addServiceCartCubit,
+      listener: (context, state) {
+        if (state is AddServiceCartLoading) {
+          Get.dialog(const Center(child: CircularProgressIndicator()));
+        }
+        if (state is AddServiceCartFailed) {
+          Get.back();
+          Get.snackbar(
+            'Tambah Keranjang Gagal',
+            state.message,
+            backgroundColor: Theme.of(context).colorScheme.error,
+          );
+        }
+
+        if (state is AddServiceCartSuccess) {
+          Get.back();
+          Get.snackbar(
+            'Tambah Layanan Berhasil',
+            state.response.alert,
+            backgroundColor: Theme.of(context).colorScheme.onPrimary,
+            colorText: Theme.of(context).colorScheme.primary,
+          );
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Kategori Layanan'),
+        ),
+        body: RefreshIndicator(
+          onRefresh: () async => refresh(),
+          child: BlocBuilder<ListServiceCubit, ListServiceState>(
+            bloc: listServiceCubit,
+            builder: (context, state) {
+              return ListView(
+                children: [
+                  serviceCategoryHeader(context),
+                  const Divider(thickness: 5, height: 5),
+                  const SizedBox(height: 5),
+                  if (state is ListServiceSuccess)
+                    Column(
+                      children: List.generate(
+                        state.response.length,
+                        (index) => ServiceCard(
+                          data: state.response[index],
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 5),
+                          onConfirm: () {
+                            Get.back();
+                            addServiceCartCubit.fetchData(
+                              state.response[index].slug,
+                            );
+                          },
+                        ),
                       ),
+                    )
+                  else
+                    SizedBox(
+                      height: Get.height * 0.75,
+                      child: Center(
+                          child: Center(
+                        child: state is ListServiceFailed
+                            ? ErrorIndicator(
+                                message: state.message,
+                                onRefresh: refresh,
+                              )
+                            : state is ListServiceLoading
+                                ? const CircularProgressIndicator()
+                                : const SizedBox(),
+                      )),
                     ),
-                  )
-                else
-                  SizedBox(
-                    height: Get.height * 0.75,
-                    child: Center(
-                        child: Center(
-                      child: state is ListServiceFailed
-                          ? ErrorIndicator(
-                              message: state.message,
-                              onRefresh: refresh,
-                            )
-                          : state is ListServiceLoading
-                              ? const CircularProgressIndicator()
-                              : const SizedBox(),
-                    )),
-                  ),
-                const SizedBox(height: 10),
-              ],
-            );
-          },
+                  const SizedBox(height: 10),
+                ],
+              );
+            },
+          ),
+        ),
+        bottomNavigationBar: Card(
+          margin: EdgeInsets.zero,
+          elevation: 10,
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: ElevatedButton(
+              onPressed: () {
+                Get.to(() => const ServiceCartPage());
+              },
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(FluentIcons.cart_20_regular),
+                  SizedBox(width: 10),
+                  Text('Lihat Keranjang Layanan'),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );

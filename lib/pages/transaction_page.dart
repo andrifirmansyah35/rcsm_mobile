@@ -3,16 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mobile_app/common/constants.dart';
 import 'package:mobile_app/common/extensions.dart';
+import 'package:mobile_app/models/response/service_cart_model.dart';
 import 'package:mobile_app/pages/home_page.dart';
 import 'package:mobile_app/pages/schedule_cart_page.dart';
 
 class TransactionPage extends StatefulWidget {
   const TransactionPage({
-    Key? key,
+    this.selectedService,
     this.isScheduled = false,
+    Key? key,
   }) : super(key: key);
 
   final bool isScheduled;
+  final ServiceCartModel? selectedService;
 
   @override
   State<TransactionPage> createState() => _TransactionPageState();
@@ -196,31 +199,32 @@ class _TransactionPageState extends State<TransactionPage> {
                 ),
         ),
         const SizedBox(width: 15),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Perawatan Rambut',
-                style: Theme.of(context)
-                    .textTheme
-                    .titleLarge!
-                    .copyWith(color: Theme.of(context).colorScheme.primary),
-              ),
-              const SizedBox(height: 5),
-              Text(
-                'Hair Cut',
-                style: Theme.of(context).textTheme.labelMedium,
-              ),
-              Text(
-                20000.convertToIdr(),
-                style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-              ),
-            ],
+        if (widget.selectedService != null)
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.selectedService!.kategoriLayanan,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleLarge!
+                      .copyWith(color: Theme.of(context).colorScheme.primary),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  widget.selectedService!.layanan,
+                  style: Theme.of(context).textTheme.labelMedium,
+                ),
+                Text(
+                  widget.selectedService!.harga.convertToIdr(),
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                ),
+              ],
+            ),
           ),
-        ),
       ],
     );
   }

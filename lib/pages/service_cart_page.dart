@@ -1,3 +1,4 @@
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
@@ -118,7 +119,18 @@ class _ServiceCartPageState extends State<ServiceCartPage> {
                       padding: const EdgeInsets.all(10),
                       child: ElevatedButton(
                         onPressed: () {
-                          Get.to(() => const TransactionPage());
+                          final selectedService = state
+                              .response.dataKeranjangLayananOpen
+                              .firstWhere(
+                            (element) =>
+                                element.idKeranjangLayanan ==
+                                selectedServiceId.value,
+                          );
+                          Get.to(
+                            () => TransactionPage(
+                              selectedService: selectedService,
+                            ),
+                          );
                         },
                         child: const Text('Pilih Layanan'),
                       ),
@@ -238,10 +250,10 @@ class _ServiceCartPageState extends State<ServiceCartPage> {
                 ),
           ),
           const SizedBox(width: 5),
-          // InkWell(
-          //   onTap: onDelete,
-          //   child: const Icon(FluentIcons.delete_12_regular),
-          // )
+          InkWell(
+            onTap: onDelete,
+            child: const Icon(FluentIcons.delete_12_regular),
+          )
         ],
       ),
       value: model.idKeranjangLayanan,

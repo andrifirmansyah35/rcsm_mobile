@@ -12,6 +12,7 @@ class ServiceCategoryPage extends StatefulWidget {
   State<ServiceCategoryPage> createState() => _ServiceCategoryPageState();
 }
 
+
 class _ServiceCategoryPageState extends State<ServiceCategoryPage> {
   final serviceCategoryCubit = sl<ServiceCategoryCubit>();
 
