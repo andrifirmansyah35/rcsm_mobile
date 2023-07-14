@@ -1,33 +1,13 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:mobile_app/app/app_injector.dart';
+import 'package:mobile_app/common/extensions.dart';
+import 'package:mobile_app/cubit/list_schedule_cart_cubit.dart';
+import 'package:mobile_app/models/response/schedule_cart_model.dart';
 import 'package:mobile_app/pages/transaction_page.dart';
-
-class Schedule {
-  final int id;
-  final String date;
-  final String time;
-
-  const Schedule(this.id, this.date, this.time);
-}
-
-const listSchedule = [
-  Schedule(
-    1,
-    '23 Desember 2023',
-    '09:00 - 10:00',
-  ),
-  Schedule(
-    2,
-    '23 Desember 2023',
-    '10:00 - 11:00',
-  ),
-  Schedule(
-    3,
-    '24 Desember 2023',
-    '09:00 - 10:00',
-  ),
-];
+import 'package:mobile_app/widgets/error_indicator.dart';
 
 class ScheduleCartPage extends StatefulWidget {
   const ScheduleCartPage({Key? key}) : super(key: key);
@@ -37,91 +17,145 @@ class ScheduleCartPage extends StatefulWidget {
 }
 
 class _ScheduleCartPageState extends State<ScheduleCartPage> {
-  final selectedSchedule = ValueNotifier<int>(listSchedule.first.id);
+  final listScheduleCartCubit = sl<ListScheduleCartCubit>();
+
+  final selectedSchedule = ValueNotifier<int>(0);
+
+  @override
+  void initState() {
+    super.initState();
+    listScheduleCartCubit.fetchData();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Keranjang Jadwal Operasi',
-        ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(10),
-        child: ElevatedButton(
-          child: const Text('Tambah Operasional'),
-          onPressed: () {
-            Get.to(() => const TransactionPage(
-                  isScheduled: true,
-                ));
-          },
-        ),
-      ),
-      body: ValueListenableBuilder<int>(
-        valueListenable: selectedSchedule,
-        builder: (context, value, _) {
-          return SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Column(
-                  children: List.generate(
-                    listSchedule.length,
-                    (index) => scheduleRadio(
-                        context: context,
-                        model: listSchedule[index],
-                        selectedId: selectedSchedule.value),
-                  ),
-                ),
-                const SizedBox(height: 5),
-                const Divider(thickness: 8),
-                const SizedBox(height: 5),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Tidak Dapat Diproses',
-                            style: Theme.of(context).textTheme.titleSmall,
-                          ),
-                          OutlinedButton(
-                            onPressed: () {},
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor:
-                                  Theme.of(context).colorScheme.primary,
-                              textStyle:
-                                  Theme.of(context).textTheme.labelMedium,
-                            ),
-                            child: const Text(
-                              'Hapus',
-                            ),
-                          )
-                        ],
-                      ),
-                      Column(
-                        children: List.generate(
-                          3,
-                          (index) => expiredScheduleCard(context),
+    return BlocConsumer<ListScheduleCartCubit, ListScheduleCartState>(
+      bloc: listScheduleCartCubit,
+      listener: (context, state) {
+        if (state is ListScheduleCartSuccess) {
+          selectedSchedule.value = state.response.keranjangOperasiBuka.first.id;
+        }
+      },
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text(
+              'Keranjang Jadwal Operasi',
+            ),
+          ),
+          bottomNavigationBar: state is ListScheduleCartSuccess
+              ? Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: ElevatedButton(
+                    child: const Text('Tambah Operasional'),
+                    onPressed: () {
+                      final schedule =
+                          state.response.keranjangOperasiBuka.firstWhere(
+                        (element) => element.id == selectedSchedule.value,
+                      );
+                      Get.to(
+                        () => TransactionPage(
+                          isScheduled: true,
+                          scheduleCartModel: schedule,
                         ),
-                      )
-                    ],
+                      );
+                    },
                   ),
                 )
-              ],
-            ),
-          );
-        },
-      ),
+              : null,
+          body: ListView(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            children: [
+              if (state is ListScheduleCartSuccess)
+                ValueListenableBuilder<int>(
+                  valueListenable: selectedSchedule,
+                  builder: (context, value, _) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Column(
+                          children: List.generate(
+                            state.response.keranjangOperasiBuka.length,
+                            (index) => scheduleRadio(
+                              context: context,
+                              model: state.response.keranjangOperasiBuka[index],
+                              selectedId: selectedSchedule.value,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        const Divider(thickness: 8),
+                        const SizedBox(height: 5),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 15),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Tidak Dapat Diproses',
+                                    style:
+                                        Theme.of(context).textTheme.titleSmall,
+                                  ),
+                                  OutlinedButton(
+                                    onPressed: () {},
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor:
+                                          Theme.of(context).colorScheme.primary,
+                                      textStyle: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium,
+                                    ),
+                                    child: const Text(
+                                      'Hapus',
+                                    ),
+                                  )
+                                ],
+                              ),
+                              Column(
+                                children: List.generate(
+                                  state.response.keranjangOperasiTerblokir
+                                      .length,
+                                  (index) => expiredScheduleCard(
+                                      context,
+                                      state.response
+                                          .keranjangOperasiTerblokir[index]),
+                                ),
+                              )
+                            ],
+                          ),
+                        )
+                      ],
+                    );
+                  },
+                )
+              else
+                SizedBox(
+                  height: Get.height,
+                  child: Center(
+                    child: state is ListScheduleCartFailed
+                        ? ErrorIndicator(
+                            message: state.message,
+                          )
+                        : state is ListScheduleCartLoading
+                            ? const CircularProgressIndicator()
+                            : const SizedBox(),
+                  ),
+                )
+            ],
+          ),
+        );
+      },
     );
   }
 
-  Container expiredScheduleCard(BuildContext context) {
+  Container expiredScheduleCard(
+    BuildContext context,
+    ScheduleCartModel model,
+  ) {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: const BoxDecoration(
@@ -133,7 +167,7 @@ class _ScheduleCartPageState extends State<ScheduleCartPage> {
         children: [
           const Icon(FluentIcons.clock_16_regular),
           const SizedBox(width: 10),
-          const Text('23 Desember 2023'),
+          Text(model.jadwalOperasi),
           const SizedBox(width: 15),
           Container(
             padding: const EdgeInsets.all(4),
@@ -142,7 +176,7 @@ class _ScheduleCartPageState extends State<ScheduleCartPage> {
               borderRadius: BorderRadius.circular(10),
             ),
             child: Text(
-              '09:00 - 10:00',
+              model.operasi,
               style: Theme.of(context).textTheme.bodySmall!.copyWith(
                     color: Theme.of(context).colorScheme.onPrimary,
                   ),
@@ -155,7 +189,7 @@ class _ScheduleCartPageState extends State<ScheduleCartPage> {
 
   RadioListTile<int> scheduleRadio({
     required BuildContext context,
-    required Schedule model,
+    required ScheduleCartModel model,
     required int selectedId,
   }) {
     return RadioListTile<int>(
@@ -167,7 +201,7 @@ class _ScheduleCartPageState extends State<ScheduleCartPage> {
           const SizedBox(width: 5),
           Expanded(
             child: Text(
-              model.date,
+              model.jadwalOperasi.formatToLocalFormat(),
               style: Theme.of(context).textTheme.bodyMedium,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -182,7 +216,7 @@ class _ScheduleCartPageState extends State<ScheduleCartPage> {
               borderRadius: BorderRadius.circular(10),
             ),
             child: Text(
-              model.time,
+              model.operasi,
               style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                     color: Theme.of(context).colorScheme.onPrimary,
                   ),

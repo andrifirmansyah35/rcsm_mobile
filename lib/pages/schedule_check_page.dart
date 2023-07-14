@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -40,7 +38,6 @@ class _ScheduleCheckPageState extends State<ScheduleCheckPage> {
   }
 
   void onAddScheduleCart(String idOperasi) {
-    log(idOperasi);
     addScheduleCartCubit.fetchData(idOperasi);
   }
 
@@ -73,7 +70,6 @@ class _ScheduleCheckPageState extends State<ScheduleCheckPage> {
           );
         }
         if (state is AddScheduleCartSuccess) {
-          log('successsss');
           onCheckSchedule();
           Get.back();
           Get.snackbar(
@@ -406,7 +402,6 @@ class _ScheduleCheckPageState extends State<ScheduleCheckPage> {
                   const SizedBox(width: 15),
                   InkWell(
                     onTap: () {
-                      log(model.id.toString());
                       Get.back();
                       onAddScheduleCart(model.id.toString());
                     },

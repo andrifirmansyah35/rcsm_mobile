@@ -6,6 +6,7 @@ import 'package:mobile_app/common/constants.dart';
 import 'package:mobile_app/common/styles.dart';
 import 'package:mobile_app/cubit/add_schedule_cart_cubit.dart';
 import 'package:mobile_app/cubit/add_service_cart_cubit.dart';
+import 'package:mobile_app/cubit/list_schedule_cart_cubit.dart';
 import 'package:mobile_app/cubit/list_service_cart_cubit.dart';
 import 'package:mobile_app/cubit/list_service_cubit.dart';
 import 'package:mobile_app/cubit/login_cubit.dart';
@@ -45,6 +46,9 @@ class App extends StatelessWidget {
         ),
         BlocProvider<AddScheduleCartCubit>(
           create: (context) => sl<AddScheduleCartCubit>(),
+        ),
+        BlocProvider<ListScheduleCartCubit>(
+          create: (context) => sl<ListScheduleCartCubit>(),
         ),
       ],
       child: GetMaterialApp(

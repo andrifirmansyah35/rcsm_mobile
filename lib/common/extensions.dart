@@ -31,4 +31,11 @@ extension IdrFormatFromString on String {
 
     return currencyFormatter.format(currencyInt);
   }
+
+  String formatToLocalFormat() {
+    final dateTime = DateTime.parse(this);
+    final dateFormat = DateFormat.yMMMMEEEEd('id');
+
+    return dateFormat.format(dateTime);
+  }
 }

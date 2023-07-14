@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mobile_app/common/constants.dart';
 import 'package:mobile_app/common/extensions.dart';
+import 'package:mobile_app/models/response/schedule_cart_model.dart';
 import 'package:mobile_app/models/response/service_cart_model.dart';
 import 'package:mobile_app/pages/home_page.dart';
 import 'package:mobile_app/pages/schedule_cart_page.dart';
@@ -11,11 +12,13 @@ class TransactionPage extends StatefulWidget {
   const TransactionPage({
     this.selectedService,
     this.isScheduled = false,
+    this.scheduleCartModel,
     Key? key,
   }) : super(key: key);
 
   final bool isScheduled;
   final ServiceCartModel? selectedService;
+  final ScheduleCartModel? scheduleCartModel;
 
   @override
   State<TransactionPage> createState() => _TransactionPageState();
@@ -46,9 +49,11 @@ class _TransactionPageState extends State<TransactionPage> {
                     'Layanan',
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
-                  const SizedBox(height: 10),
-                  serviceCartDetail(context),
-                  const SizedBox(height: 10),
+                  if (widget.selectedService != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      child: serviceCartDetail(context),
+                    ),
                   ElevatedButton(
                     onPressed: () {
                       // TODO
@@ -91,37 +96,10 @@ class _TransactionPageState extends State<TransactionPage> {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 8),
-                  if (widget.isScheduled)
+                  if (widget.scheduleCartModel != null)
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 5),
-                      child: Row(
-                        children: [
-                          Text(
-                            '23 Desember 2023',
-                            style: Theme.of(context).textTheme.bodyMedium,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primary,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              '09:00 - 10:00',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium!
-                                  .copyWith(
-                                    color:
-                                        Theme.of(context).colorScheme.onPrimary,
-                                  ),
-                            ),
-                          )
-                        ],
-                      ),
+                      child: scheduleCard(context),
                     ),
                   ElevatedButton(
                     onPressed: () {
@@ -173,6 +151,33 @@ class _TransactionPageState extends State<TransactionPage> {
           child: const Text('Booking'),
         ),
       ),
+    );
+  }
+
+  Row scheduleCard(BuildContext context) {
+    return Row(
+      children: [
+        Text(
+          widget.scheduleCartModel!.jadwalOperasi.formatToLocalFormat(),
+          style: Theme.of(context).textTheme.bodyMedium,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(width: 8),
+        Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primary,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Text(
+            widget.scheduleCartModel!.operasi,
+            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
+          ),
+        )
+      ],
     );
   }
 
