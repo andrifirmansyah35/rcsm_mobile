@@ -1,9 +1,12 @@
+import 'dart:developer';
+
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:mobile_app/app/app_injector.dart';
 import 'package:mobile_app/common/extensions.dart';
+import 'package:mobile_app/cubit/add_schedule_cart_cubit.dart';
 import 'package:mobile_app/cubit/schedule_check_cubit.dart';
 import 'package:mobile_app/models/request/schedule_check_body.dart';
 import 'package:mobile_app/models/response/schedule_check_model.dart';
@@ -18,6 +21,7 @@ class ScheduleCheckPage extends StatefulWidget {
 
 class _ScheduleCheckPageState extends State<ScheduleCheckPage> {
   final scheduleCheckCubit = sl<ScheduleCheckCubit>();
+  final addScheduleCartCubit = sl<AddScheduleCartCubit>();
 
   final selectedDate = ValueNotifier<DateTime?>(null);
   final isChecking = ValueNotifier<bool>(false);
@@ -35,101 +39,139 @@ class _ScheduleCheckPageState extends State<ScheduleCheckPage> {
     isChecking.value = false;
   }
 
+  void onAddScheduleCart(String idOperasi) {
+    log(idOperasi);
+    addScheduleCartCubit.fetchData(idOperasi);
+  }
+
+  void onCheckSchedule() {
+    scheduleCheckCubit.fetchData(
+      ScheduleCheckBody(
+        tahun: selectedDate.value!.year.toString(),
+        bulan: selectedDate.value!.month.toString(),
+        hari: selectedDate.value!.day.toString(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Cek Jadwal Operasi'),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(8),
-        controller: scrollController,
-        child: ValueListenableBuilder<DateTime?>(
-          valueListenable: selectedDate,
-          builder: (context, dateValue, _) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Card(
-                  color: Theme.of(context).colorScheme.background,
-                  child: InkWell(
-                    onTap: () {
-                      onDatePick();
-                    },
-                    child: datePickButton(dateValue),
-                  ),
-                ),
-                const SizedBox(height: 5),
-                ElevatedButton(
-                  onPressed: selectedDate.value == null
-                      ? null
-                      : () {
-                          isChecking.value = true;
-                          scheduleCheckCubit.fetchData(
-                            ScheduleCheckBody(
-                              tahun: selectedDate.value!.year.toString(),
-                              bulan: selectedDate.value!.month.toString(),
-                              hari: selectedDate.value!.day.toString(),
-                            ),
-                          );
-                        },
-                  child: const Text('Cek Jadwal'),
-                ),
-                const SizedBox(height: 10),
-                ValueListenableBuilder(
-                    valueListenable: isChecking,
-                    builder: (context, checkingValue, _) {
-                      if (!checkingValue) {
-                        return const SizedBox();
-                      }
-
-                      return BlocBuilder<ScheduleCheckCubit,
-                          ScheduleCheckState>(
-                        bloc: scheduleCheckCubit,
-                        builder: (context, state) {
-                          if (state is ScheduleCheckSuccess &&
-                              selectedDate.value != null) {
-                            final data = state.response;
-
-                            return listTimeContainer(
-                              context,
-                              dateValue,
-                              data,
-                            );
-                          } else {
-                            return SizedBox(
-                              height: 300,
-                              child: Center(
-                                child: state is ScheduleCheckFailed
-                                    ? Text(state.message)
-                                    : state is ScheduleCheckLoading
-                                        ? const CircularProgressIndicator()
-                                        : const SizedBox(),
-                              ),
-                            );
-                          }
-                        },
-                      );
-                    })
-              ],
-            );
-          },
+    return BlocListener<AddScheduleCartCubit, AddScheduleCartState>(
+      bloc: addScheduleCartCubit,
+      listener: (context, state) {
+        if (state is AddScheduleCartLoading) {
+          Get.dialog(const Center(
+            child: CircularProgressIndicator(),
+          ));
+        }
+        if (state is AddScheduleCartFailed) {
+          Get.back();
+          Get.snackbar(
+            'Tambah Keranjang Jadwal Gagal',
+            state.message,
+            backgroundColor: Theme.of(context).colorScheme.error,
+          );
+        }
+        if (state is AddScheduleCartSuccess) {
+          log('successsss');
+          onCheckSchedule();
+          Get.back();
+          Get.snackbar(
+            'Berhasil Menambah Operasional',
+            state.response.message,
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            colorText: Theme.of(context).colorScheme.onPrimary,
+          );
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Cek Jadwal Operasi'),
         ),
-      ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(20),
-        color: Theme.of(context).colorScheme.onBackground,
-        child: ElevatedButton(
-          onPressed: () {
-            Get.to(() => const ScheduleCartPage());
-          },
-          child: const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(FluentIcons.cart_20_regular),
-              SizedBox(width: 10),
-              Text('Lihat Keranjang Operasi'),
-            ],
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(8),
+          controller: scrollController,
+          child: ValueListenableBuilder<DateTime?>(
+            valueListenable: selectedDate,
+            builder: (context, dateValue, _) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Card(
+                    color: Theme.of(context).colorScheme.background,
+                    child: InkWell(
+                      onTap: () {
+                        onDatePick();
+                      },
+                      child: datePickButton(dateValue),
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  ElevatedButton(
+                    onPressed: selectedDate.value == null
+                        ? null
+                        : () {
+                            isChecking.value = true;
+                            onCheckSchedule();
+                          },
+                    child: const Text('Cek Jadwal'),
+                  ),
+                  const SizedBox(height: 10),
+                  ValueListenableBuilder(
+                      valueListenable: isChecking,
+                      builder: (context, checkingValue, _) {
+                        if (!checkingValue) {
+                          return const SizedBox();
+                        }
+
+                        return BlocBuilder<ScheduleCheckCubit,
+                            ScheduleCheckState>(
+                          bloc: scheduleCheckCubit,
+                          builder: (context, state) {
+                            if (state is ScheduleCheckSuccess &&
+                                selectedDate.value != null) {
+                              final data = state.response;
+
+                              return listTimeContainer(
+                                context,
+                                dateValue,
+                                data,
+                              );
+                            } else {
+                              return SizedBox(
+                                height: 300,
+                                child: Center(
+                                  child: state is ScheduleCheckFailed
+                                      ? Text(state.message)
+                                      : state is ScheduleCheckLoading
+                                          ? const CircularProgressIndicator()
+                                          : const SizedBox(),
+                                ),
+                              );
+                            }
+                          },
+                        );
+                      })
+                ],
+              );
+            },
+          ),
+        ),
+        bottomNavigationBar: Container(
+          padding: const EdgeInsets.all(20),
+          color: Theme.of(context).colorScheme.onBackground,
+          child: ElevatedButton(
+            onPressed: () {
+              Get.to(() => const ScheduleCartPage());
+            },
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(FluentIcons.cart_20_regular),
+                SizedBox(width: 10),
+                Text('Lihat Keranjang Operasi'),
+              ],
+            ),
           ),
         ),
       ),
@@ -272,7 +314,7 @@ class _ScheduleCheckPageState extends State<ScheduleCheckPage> {
     BuildContext context,
   ) {
     return Card(
-      color: model.status
+      color: !model.status
           ? Theme.of(context).colorScheme.tertiary
           : Theme.of(context).colorScheme.onError,
       margin: EdgeInsets.zero,
@@ -281,7 +323,7 @@ class _ScheduleCheckPageState extends State<ScheduleCheckPage> {
       ),
       child: InkWell(
         onTap: () {
-          if (model.status) {
+          if (!model.status) {
             Get.dialog(addScheduleDialog(model));
           } else {
             Get.closeAllSnackbars();
@@ -364,15 +406,9 @@ class _ScheduleCheckPageState extends State<ScheduleCheckPage> {
                   const SizedBox(width: 15),
                   InkWell(
                     onTap: () {
+                      log(model.id.toString());
                       Get.back();
-                      Get.snackbar(
-                        'Berhasil',
-                        'Jadwal Operasi berhasil ditambah ke Keranjang Operasi',
-                        backgroundColor:
-                            Theme.of(context).colorScheme.background,
-                        colorText: Colors.black,
-                        snackPosition: SnackPosition.BOTTOM,
-                      );
+                      onAddScheduleCart(model.id.toString());
                     },
                     child: Text(
                       'Ya',

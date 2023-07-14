@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:mobile_app/cubit/add_schedule_cart_cubit.dart';
 import 'package:mobile_app/cubit/add_service_cart_cubit.dart';
 import 'package:mobile_app/cubit/list_service_cart_cubit.dart';
 import 'package:mobile_app/cubit/list_service_cubit.dart';
@@ -21,5 +22,6 @@ class AppInjector {
     sl.registerFactory(() => ListServiceCartCubit());
     sl.registerFactory(() => AddServiceCartCubit());
     sl.registerFactory(() => ScheduleCheckCubit());
+    sl.registerFactory(() => AddScheduleCartCubit());
   }
 }

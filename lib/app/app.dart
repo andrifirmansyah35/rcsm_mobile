@@ -4,6 +4,7 @@ import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:mobile_app/app/app_injector.dart';
 import 'package:mobile_app/common/constants.dart';
 import 'package:mobile_app/common/styles.dart';
+import 'package:mobile_app/cubit/add_schedule_cart_cubit.dart';
 import 'package:mobile_app/cubit/add_service_cart_cubit.dart';
 import 'package:mobile_app/cubit/list_service_cart_cubit.dart';
 import 'package:mobile_app/cubit/list_service_cubit.dart';
@@ -41,6 +42,9 @@ class App extends StatelessWidget {
         ),
         BlocProvider<ScheduleCheckCubit>(
           create: (context) => sl<ScheduleCheckCubit>(),
+        ),
+        BlocProvider<AddScheduleCartCubit>(
+          create: (context) => sl<AddScheduleCartCubit>(),
         ),
       ],
       child: GetMaterialApp(
