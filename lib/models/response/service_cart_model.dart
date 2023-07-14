@@ -29,12 +29,14 @@ class ServiceCartModel extends Equatable {
   final bool status;
   final String layanan;
   final String kategoriLayanan;
+  final String gambarKategoriLayanan;
   final String harga;
 
   const ServiceCartModel({
     required this.idKeranjangLayanan,
     required this.status,
     required this.layanan,
+    required this.gambarKategoriLayanan, 
     required this.kategoriLayanan,
     required this.harga,
   });
@@ -46,6 +48,7 @@ class ServiceCartModel extends Equatable {
   List<Object?> get props => [
         idKeranjangLayanan,
         status,
+        gambarKategoriLayanan,
         layanan,
         kategoriLayanan,
       ];

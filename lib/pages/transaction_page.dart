@@ -22,8 +22,6 @@ class TransactionPage extends StatefulWidget {
 }
 
 class _TransactionPageState extends State<TransactionPage> {
-  String? imageUrl =
-      'https://res.cloudinary.com/dk0z4ums3/image/upload/v1675244075/attached_image/pilihan-perawatan-di-salon-rambut-yang-bisa-kamu-coba.jpg';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -184,19 +182,23 @@ class _TransactionPageState extends State<TransactionPage> {
         const SizedBox(width: 5),
         ClipRRect(
           borderRadius: BorderRadius.circular(50),
-          child: imageUrl != null
-              ? Image.network(
-                  imageUrl!,
-                  width: 60,
-                  height: 60,
-                  fit: BoxFit.cover,
-                )
-              : Image.asset(
-                  Constants.dummyImagePath,
-                  width: 60,
-                  height: 60,
-                  fit: BoxFit.cover,
-                ),
+          child: FadeInImage(
+            image: NetworkImage(
+              '${Constants.storageUrl}/${widget.selectedService!.gambarKategoriLayanan}',
+            ),
+            placeholder: const AssetImage(
+              Constants.dummyImagePath,
+            ),
+            imageErrorBuilder: (context, error, stackTrace) => Image.asset(
+              Constants.dummyImagePath,
+              width: 60,
+              height: 60,
+              fit: BoxFit.cover,
+            ),
+            width: 60,
+            height: 60,
+            fit: BoxFit.cover,
+          ),
         ),
         const SizedBox(width: 15),
         if (widget.selectedService != null)
