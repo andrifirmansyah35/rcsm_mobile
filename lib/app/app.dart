@@ -7,6 +7,7 @@ import 'package:mobile_app/common/styles.dart';
 import 'package:mobile_app/cubit/add_reservation_cubit.dart';
 import 'package:mobile_app/cubit/add_schedule_cart_cubit.dart';
 import 'package:mobile_app/cubit/add_service_cart_cubit.dart';
+import 'package:mobile_app/cubit/list_reservation_cubit.dart';
 import 'package:mobile_app/cubit/list_schedule_cart_cubit.dart';
 import 'package:mobile_app/cubit/list_service_cart_cubit.dart';
 import 'package:mobile_app/cubit/list_service_cubit.dart';
@@ -53,6 +54,9 @@ class App extends StatelessWidget {
         ),
         BlocProvider<AddReservationCubit>(
           create: (context) => sl<AddReservationCubit>(),
+        ),
+        BlocProvider<ListReservationCubit>(
+          create: (context) => sl<ListReservationCubit>(),
         ),
       ],
       child: GetMaterialApp(

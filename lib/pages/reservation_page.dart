@@ -1,92 +1,13 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mobile_app/app/app_injector.dart';
 import 'package:mobile_app/common/constants.dart';
+import 'package:mobile_app/common/enum.dart';
 import 'package:mobile_app/common/extensions.dart';
-
-enum ReservationStatus { antre, done, canceled }
-
-class ReservationModel {
-  final int id;
-  final String date;
-  final String name;
-  final String desc;
-  final int price;
-  final ReservationStatus status;
-  final String? imageUrl;
-
-  const ReservationModel({
-    required this.id,
-    required this.date,
-    required this.name,
-    required this.desc,
-    required this.price,
-    required this.status,
-    this.imageUrl,
-  });
-}
-
-const listReservation = [
-  ReservationModel(
-    id: 1,
-    date: '23 Desember 2023',
-    imageUrl:
-        'https://d1vbn70lmn1nqe.cloudfront.net/prod/wp-content/uploads/2021/07/01103723/Beragam-Pilihan-Perawatan-Rambut-di-Salon-Kecantikan.jpg',
-    name: 'Perawatan Rambut',
-    desc: 'Hair Cut',
-    price: 20000,
-    status: ReservationStatus.antre,
-  ),
-  ReservationModel(
-    id: 2,
-    date: '23 Desember 2023',
-    imageUrl:
-        'https://res.cloudinary.com/dk0z4ums3/image/upload/v1675244075/attached_image/pilihan-perawatan-di-salon-rambut-yang-bisa-kamu-coba.jpg',
-    name: 'Perawatan Rambut',
-    desc: 'Hair Cut',
-    price: 20000,
-    status: ReservationStatus.done,
-  ),
-  ReservationModel(
-    id: 3,
-    date: '23 Desember 2023',
-    imageUrl:
-        'https://d1vbn70lmn1nqe.cloudfront.net/prod/wp-content/uploads/2021/07/01103723/Beragam-Pilihan-Perawatan-Rambut-di-Salon-Kecantikan.jpg',
-    name: 'Perawatan Rambut',
-    desc: 'Hair Cut',
-    price: 20000,
-    status: ReservationStatus.canceled,
-  ),
-  ReservationModel(
-    id: 4,
-    date: '23 Desember 2023',
-    imageUrl:
-        'https://d1vbn70lmn1nqe.cloudfront.net/prod/wp-content/uploads/2021/07/01103723/Beragam-Pilihan-Perawatan-Rambut-di-Salon-Kecantikan.jpg',
-    name: 'Perawatan Rambut',
-    desc: 'Hair Cut',
-    price: 20000,
-    status: ReservationStatus.antre,
-  ),
-  ReservationModel(
-    id: 5,
-    date: '23 Desember 2023',
-    imageUrl:
-        'https://res.cloudinary.com/dk0z4ums3/image/upload/v1675244075/attached_image/pilihan-perawatan-di-salon-rambut-yang-bisa-kamu-coba.jpg',
-    name: 'Perawatan Rambut',
-    desc: 'Hair Cut',
-    price: 20000,
-    status: ReservationStatus.done,
-  ),
-  ReservationModel(
-    id: 6,
-    date: '23 Desember 2023',
-    imageUrl:
-        'https://d1vbn70lmn1nqe.cloudfront.net/prod/wp-content/uploads/2021/07/01103723/Beragam-Pilihan-Perawatan-Rambut-di-Salon-Kecantikan.jpg',
-    name: 'Perawatan Rambut',
-    desc: 'Hair Cut',
-    price: 20000,
-    status: ReservationStatus.canceled,
-  ),
-];
+import 'package:mobile_app/cubit/list_reservation_cubit.dart';
+import 'package:mobile_app/models/response/list_reservation_model.dart';
+import 'package:mobile_app/widgets/error_indicator.dart';
 
 class ReservationPage extends StatefulWidget {
   const ReservationPage({Key? key}) : super(key: key);
@@ -96,21 +17,55 @@ class ReservationPage extends StatefulWidget {
 }
 
 class _ReservationPageState extends State<ReservationPage> {
+  final listReservationCubit = sl<ListReservationCubit>();
+
+  void refresh() {
+    listReservationCubit.fetchData();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    refresh();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Reservasi'),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: List.generate(
-            listReservation.length,
-            (index) => reservationCard(
-              context,
-              listReservation[index],
-            ),
-          ),
+      body: RefreshIndicator(
+        onRefresh: () async => refresh(),
+        child: BlocBuilder<ListReservationCubit, ListReservationState>(
+          bloc: listReservationCubit,
+          builder: (context, state) {
+            return Stack(
+              children: [
+                if (state is ListReservationSuccess)
+                  ListView(
+                    children: List.generate(
+                      state.response.reservasiUserComplete.length,
+                      (index) => reservationCard(
+                        context,
+                        state.response.reservasiUserComplete[index],
+                      ),
+                    ),
+                  ),
+                if (state is ListReservationLoading)
+                  const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                if (state is ListReservationFailed)
+                  Center(
+                    child: ErrorIndicator(
+                      message: state.message,
+                      onRefresh: refresh,
+                    ),
+                  ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -124,7 +79,7 @@ class _ReservationPageState extends State<ReservationPage> {
       margin: const EdgeInsets.all(10),
       elevation: 5,
       child: InkWell(
-        onTap: () {},
+        // onTap: () {},
         child: Padding(
           padding: const EdgeInsets.all(10),
           child: Column(
@@ -150,7 +105,7 @@ class _ReservationPageState extends State<ReservationPage> {
                               ),
                         ),
                         Text(
-                          model.date,
+                          model.tanggal.formatToLocalFormat(),
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],
@@ -160,22 +115,24 @@ class _ReservationPageState extends State<ReservationPage> {
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
-                      color: model.status == ReservationStatus.antre
+                      color: model.status == ReservationStatusType.antri ||
+                              model.status == ReservationStatusType.diproses
                           ? Theme.of(context).colorScheme.error
-                          : model.status == ReservationStatus.done
+                          : model.status == ReservationStatusType.selesai
                               ? Theme.of(context).colorScheme.surface
                               : Theme.of(context).colorScheme.primary,
                     ),
                     child: Text(
-                      model.status == ReservationStatus.antre
-                          ? 'Mengantri'
-                          : model.status == ReservationStatus.done
-                              ? 'Selesai'
-                              : 'Dibatalkan',
+                      model.status.name.toUpperCase(),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: model.status == ReservationStatus.canceled
-                                ? Theme.of(context).colorScheme.onPrimary
-                                : Theme.of(context).colorScheme.primary,
+                            color: model.status ==
+                                        ReservationStatusType.antri ||
+                                    model.status ==
+                                        ReservationStatusType.diproses
+                                ? Theme.of(context).colorScheme.onError
+                                : model.status == ReservationStatusType.selesai
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(context).colorScheme.onPrimary,
                           ),
                     ),
                   ),
@@ -187,9 +144,9 @@ class _ReservationPageState extends State<ReservationPage> {
                   const SizedBox(width: 5),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(50),
-                    child: model.imageUrl != null
+                    child: model.gambar != null
                         ? Image.network(
-                            model.imageUrl!,
+                            '${Constants.storageUrl}/${model.gambar!}',
                             width: 60,
                             height: 60,
                             fit: BoxFit.cover,
@@ -207,7 +164,7 @@ class _ReservationPageState extends State<ReservationPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          model.name,
+                          model.kategoriLayanan,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context)
@@ -220,7 +177,7 @@ class _ReservationPageState extends State<ReservationPage> {
                         ),
                         const SizedBox(height: 5),
                         Text(
-                          model.desc,
+                          model.layananNama,
                           style: Theme.of(context).textTheme.labelMedium,
                         ),
                       ],
@@ -228,7 +185,7 @@ class _ReservationPageState extends State<ReservationPage> {
                   ),
                   const SizedBox(width: 10),
                   Text(
-                    model.price.convertToIdr(),
+                    model.harga.convertToIdr(),
                     style: Theme.of(context).textTheme.titleMedium!.copyWith(
                           color: Theme.of(context).colorScheme.primary,
                         ),
