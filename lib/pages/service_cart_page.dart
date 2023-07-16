@@ -54,97 +54,103 @@ class _ServiceCartPageState extends State<ServiceCartPage> {
           appBar: AppBar(
             title: const Text('Keranjang Layanan'),
           ),
-          body: ListView(
-            padding: const EdgeInsets.all(12),
-            children: [
-              if (state is ListServiceCartSuccess)
-                ValueListenableBuilder<int>(
-                  valueListenable: selectedServiceId,
-                  builder: (context, value, _) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        if (state.response.dataKeranjangLayananOpen.isNotEmpty)
-                          Column(
-                            children: List.generate(
-                              state.response.dataKeranjangLayananOpen.length,
-                              (index) => serviceCartRadio(
-                                context: context,
-                                model: state
-                                    .response.dataKeranjangLayananOpen[index],
-                                selectedValue: value,
-                              ),
-                            ),
-                          )
-                        else
-                          SizedBox(
-                            height: Get.height / 2,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Text(
-                                  'Keranjang Layanan kamu masih kosong',
-                                ),
-                                const SizedBox(height: 20),
-                                ElevatedButton(
-                                  child: const Text('Tambah Layanan'),
-                                  onPressed: () {
-                                    Get.to(
-                                      () => ServiceCategoryPage(
-                                        scheduleCartModel:
-                                            widget.scheduleCartModel,
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                        const SizedBox(height: 10),
-                        const Divider(),
-                        if (state.response.dataKeranjangClose.isNotEmpty)
-                          Column(
+          body: RefreshIndicator(
+            onRefresh: () async => refresh(),
+            child: Stack(
+              children: [
+                if (state is ListServiceCartSuccess)
+                  ListView(
+                    padding: const EdgeInsets.all(12),
+                    children: [
+                      ValueListenableBuilder<int>(
+                        valueListenable: selectedServiceId,
+                        builder: (context, value, _) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              closedServiceHeading(
-                                context: context,
-                                onDelete: () {},
-                              ),
-                              const SizedBox(height: 5),
-                              Column(
-                                children: List.generate(
-                                  state.response.dataKeranjangClose.length,
-                                  (index) => Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 5,
+                              if (state
+                                  .response.dataKeranjangLayananOpen.isNotEmpty)
+                                Column(
+                                  children: List.generate(
+                                    state.response.dataKeranjangLayananOpen
+                                        .length,
+                                    (index) => serviceCartRadio(
+                                      context: context,
+                                      model: state.response
+                                          .dataKeranjangLayananOpen[index],
+                                      selectedValue: value,
                                     ),
-                                    child: closedServiceCard(
-                                        context,
-                                        state.response
-                                            .dataKeranjangClose[index]),
+                                  ),
+                                )
+                              else
+                                SizedBox(
+                                  height: Get.height / 2,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Text(
+                                        'Keranjang Layanan kamu masih kosong',
+                                      ),
+                                      const SizedBox(height: 20),
+                                      ElevatedButton(
+                                        child: const Text('Tambah Layanan'),
+                                        onPressed: () {
+                                          Get.to(
+                                            () => ServiceCategoryPage(
+                                              scheduleCartModel:
+                                                  widget.scheduleCartModel,
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              ),
+                              const SizedBox(height: 10),
+                              const Divider(),
+                              if (state.response.dataKeranjangClose.isNotEmpty)
+                                Column(
+                                  children: [
+                                    closedServiceHeading(
+                                      context: context,
+                                      onDelete: () {},
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Column(
+                                      children: List.generate(
+                                        state
+                                            .response.dataKeranjangClose.length,
+                                        (index) => Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 5,
+                                          ),
+                                          child: closedServiceCard(
+                                              context,
+                                              state.response
+                                                  .dataKeranjangClose[index]),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                )
                             ],
-                          )
-                      ],
-                    );
-                  },
-                )
-              else
-                SizedBox(
-                  height: Get.height,
-                  child: Center(
-                    child: state is ListServiceCartFailed
-                        ? ErrorIndicator(
-                            message: state.message,
-                            onRefresh: refresh,
-                          )
-                        : state is ListServiceCartLoading
-                            ? const CircularProgressIndicator()
-                            : const SizedBox(),
+                          );
+                        },
+                      )
+                    ],
                   ),
-                )
-            ],
+                if (state is ListServiceCartFailed)
+                  Center(
+                      child: ErrorIndicator(
+                    message: state.message,
+                    onRefresh: refresh,
+                  )),
+                if (state is ListServiceCartLoading)
+                  const Center(
+                    child: CircularProgressIndicator(),
+                  )
+              ],
+            ),
           ),
           bottomNavigationBar: state is ListServiceCartSuccess
               ? Card(

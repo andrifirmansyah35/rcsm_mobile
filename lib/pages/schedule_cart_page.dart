@@ -28,10 +28,14 @@ class _ScheduleCartPageState extends State<ScheduleCartPage> {
 
   final selectedSchedule = ValueNotifier<int>(0);
 
+  void refresh() {
+    listScheduleCartCubit.fetchData();
+  }
+
   @override
   void initState() {
     super.initState();
-    listScheduleCartCubit.fetchData();
+    refresh();
   }
 
   @override
@@ -76,118 +80,124 @@ class _ScheduleCartPageState extends State<ScheduleCartPage> {
                       : null,
                 )
               : null,
-          body: ListView(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            children: [
-              if (state is ListScheduleCartSuccess)
-                ValueListenableBuilder<int>(
-                  valueListenable: selectedSchedule,
-                  builder: (context, value, _) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        if (state.response.keranjangOperasiBuka.isNotEmpty)
-                          Column(
-                            children: List.generate(
-                              state.response.keranjangOperasiBuka.length,
-                              (index) => scheduleRadio(
-                                context: context,
-                                model:
-                                    state.response.keranjangOperasiBuka[index],
-                                selectedId: selectedSchedule.value,
-                              ),
-                            ),
-                          )
-                        else
-                          SizedBox(
-                            height: Get.height / 2,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Text(
-                                  'Keranjang Jadwal kamu masih kosong',
-                                ),
-                                const SizedBox(height: 20),
-                                ElevatedButton(
-                                  child: const Text('Tambah Jadwal Baru'),
-                                  onPressed: () {
-                                    Get.to(
-                                      () => ScheduleCheckPage(
-                                        serviceCartModel:
-                                            widget.serviceCartModel,
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                        const SizedBox(height: 5),
-                        const Divider(thickness: 8),
-                        const SizedBox(height: 5),
-                        if (state.response.keranjangOperasiTerblokir.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 15),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'Tidak Dapat Diproses',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleSmall,
-                                    ),
-                                    OutlinedButton(
-                                      onPressed: () {},
-                                      style: OutlinedButton.styleFrom(
-                                        foregroundColor: Theme.of(context)
-                                            .colorScheme
-                                            .primary,
-                                        textStyle: Theme.of(context)
-                                            .textTheme
-                                            .labelMedium,
-                                      ),
-                                      child: const Text(
-                                        'Hapus',
-                                      ),
-                                    )
-                                  ],
-                                ),
+          body: RefreshIndicator(
+            onRefresh: () async => refresh(),
+            child: Stack(
+              children: [
+                if (state is ListScheduleCartLoading)
+                  const Center(child: CircularProgressIndicator()),
+                if (state is ListScheduleCartFailed)
+                  ErrorIndicator(
+                    message: state.message,
+                    onRefresh: refresh,
+                  ),
+                if (state is ListScheduleCartSuccess)
+                  ListView(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    children: [
+                      ValueListenableBuilder<int>(
+                        valueListenable: selectedSchedule,
+                        builder: (context, value, _) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              if (state
+                                  .response.keranjangOperasiBuka.isNotEmpty)
                                 Column(
                                   children: List.generate(
-                                    state.response.keranjangOperasiTerblokir
-                                        .length,
-                                    (index) => expiredScheduleCard(
-                                        context,
-                                        state.response
-                                            .keranjangOperasiTerblokir[index]),
+                                    state.response.keranjangOperasiBuka.length,
+                                    (index) => scheduleRadio(
+                                      context: context,
+                                      model: state
+                                          .response.keranjangOperasiBuka[index],
+                                      selectedId: selectedSchedule.value,
+                                    ),
                                   ),
                                 )
-                              ],
-                            ),
-                          )
-                      ],
-                    );
-                  },
-                )
-              else
-                SizedBox(
-                  height: Get.height,
-                  child: Center(
-                    child: state is ListScheduleCartFailed
-                        ? ErrorIndicator(
-                            message: state.message,
-                          )
-                        : state is ListScheduleCartLoading
-                            ? const CircularProgressIndicator()
-                            : const SizedBox(),
+                              else
+                                SizedBox(
+                                  height: Get.height / 2,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Text(
+                                        'Keranjang Jadwal kamu masih kosong',
+                                      ),
+                                      const SizedBox(height: 20),
+                                      ElevatedButton(
+                                        child: const Text('Tambah Jadwal Baru'),
+                                        onPressed: () {
+                                          Get.to(
+                                            () => ScheduleCheckPage(
+                                              serviceCartModel:
+                                                  widget.serviceCartModel,
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              const SizedBox(height: 5),
+                              const Divider(thickness: 8),
+                              const SizedBox(height: 5),
+                              if (state.response.keranjangOperasiTerblokir
+                                  .isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 15),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            'Tidak Dapat Diproses',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleSmall,
+                                          ),
+                                          OutlinedButton(
+                                            onPressed: () {},
+                                            style: OutlinedButton.styleFrom(
+                                              foregroundColor: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
+                                              textStyle: Theme.of(context)
+                                                  .textTheme
+                                                  .labelMedium,
+                                            ),
+                                            child: const Text(
+                                              'Hapus',
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                      Column(
+                                        children: List.generate(
+                                          state.response
+                                              .keranjangOperasiTerblokir.length,
+                                          (index) => expiredScheduleCard(
+                                              context,
+                                              state.response
+                                                      .keranjangOperasiTerblokir[
+                                                  index]),
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                )
+                            ],
+                          );
+                        },
+                      ),
+                    ],
                   ),
-                )
-            ],
+              ],
+            ),
           ),
         );
       },
