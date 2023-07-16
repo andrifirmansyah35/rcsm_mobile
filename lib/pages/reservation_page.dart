@@ -104,9 +104,18 @@ class _ReservationPageState extends State<ReservationPage> {
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
-                        Text(
-                          model.tanggal.formatToLocalFormat(),
-                          style: Theme.of(context).textTheme.bodySmall,
+                        const SizedBox(height: 2),
+                        Row(
+                          children: [
+                            Text(
+                              model.tanggal.formatToLocalFormat(),
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            Text(
+                              ', ${model.operasi}',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ],
                         ),
                       ],
                     ),

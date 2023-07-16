@@ -71,7 +71,7 @@ class _DetailServiceCategoryState extends State<DetailServiceCategoryPage> {
 
           if (widget.scheduleCartModel != null) {
             Get.to(
-              TransactionPage(
+              () => TransactionPage(
                 selectedService: state.response.data,
                 scheduleCartModel: widget.scheduleCartModel,
               ),

@@ -86,7 +86,7 @@ class _ScheduleCheckPageState extends State<ScheduleCheckPage> {
           );
           if (widget.serviceCartModel != null) {
             Get.to(
-              TransactionPage(
+              () => TransactionPage(
                 selectedService: widget.serviceCartModel,
                 scheduleCartModel: state.response.data,
               ),
