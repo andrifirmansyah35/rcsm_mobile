@@ -10,4 +10,5 @@ class Constants {
 
   static const keyToken = 'KEYTOKEN';
   static const keyMemberName = 'KEYMEMBERNAME';
+  static const keyMemberEmail = 'KEYMEMBEREMAIL';
 }

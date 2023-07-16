@@ -35,6 +35,7 @@ class LoginCubit extends Cubit<LoginState> {
 
         prefs.setString(Constants.keyToken, result.token);
         prefs.setString(Constants.keyMemberName, result.user.name);
+        prefs.setString(Constants.keyMemberEmail, result.user.email);
 
         emit(LoginSuccess(
           LoginModel.fromJson(jsonDecode(response.body)),

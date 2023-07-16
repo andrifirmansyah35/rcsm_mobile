@@ -26,6 +26,7 @@ class LoginModel extends Equatable {
 class UserLoginModel extends Equatable {
   final int id;
   final String name;
+  final String email;
   final String? photoProfile;
 
   factory UserLoginModel.fromJson(Map<String, dynamic> json) =>
@@ -34,6 +35,7 @@ class UserLoginModel extends Equatable {
   const UserLoginModel({
     required this.id,
     required this.name,
+    required this.email,
     this.photoProfile,
   });
 

@@ -39,7 +39,7 @@ class CustomDrawer extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          'Happy Nessa M',
+                          prefs.getString(Constants.keyMemberName) ?? '',
                           style: Theme.of(context)
                               .textTheme
                               .titleLarge!
@@ -47,7 +47,9 @@ class CustomDrawer extends StatelessWidget {
                                 color: Theme.of(context).colorScheme.primary,
                               ),
                         ),
-                        const Text('happyhappy@gmail.com'),
+                        Text(
+                          prefs.getString(Constants.keyMemberEmail) ?? '',
+                        ),
                       ],
                     ),
                   )

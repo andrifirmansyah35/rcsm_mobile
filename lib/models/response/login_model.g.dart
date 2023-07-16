@@ -16,5 +16,6 @@ UserLoginModel _$UserLoginModelFromJson(Map<String, dynamic> json) =>
     UserLoginModel(
       id: json['id'] as int,
       name: json['name'] as String,
+      email: json['email'] as String,
       photoProfile: json['photo_profile'] as String?,
     );

@@ -12,6 +12,7 @@ import 'package:mobile_app/models/response/service_cart_model.dart';
 import 'package:mobile_app/pages/home_page.dart';
 import 'package:mobile_app/pages/schedule_cart_page.dart';
 import 'package:mobile_app/pages/service_cart_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TransactionPage extends StatefulWidget {
   const TransactionPage({
@@ -29,6 +30,7 @@ class TransactionPage extends StatefulWidget {
 
 class _TransactionPageState extends State<TransactionPage> {
   final addReservationCubit = sl<AddReservationCubit>();
+  final prefs = sl<SharedPreferences>();
 
   void bookingReservation() {
     addReservationCubit.fetchData(ReservationBody(
@@ -295,14 +297,14 @@ class _TransactionPageState extends State<TransactionPage> {
           ),
           const SizedBox(height: 5),
           Text(
-            'Agus Firmansyah',
+            prefs.getString(Constants.keyMemberName) ?? '',
             style: Theme.of(context)
                 .textTheme
                 .titleMedium!
                 .copyWith(color: Theme.of(context).colorScheme.primary),
           ),
           Text(
-            'ahahaagus@gmail.com',
+            prefs.getString(Constants.keyMemberEmail) ?? '',
             style: Theme.of(context).textTheme.titleSmall!,
           ),
         ],
