@@ -2,7 +2,9 @@ import 'package:get_it/get_it.dart';
 import 'package:mobile_app/cubit/add_reservation_cubit.dart';
 import 'package:mobile_app/cubit/add_schedule_cart_cubit.dart';
 import 'package:mobile_app/cubit/add_service_cart_cubit.dart';
+import 'package:mobile_app/cubit/delete_closed_schedule_cart_cubit.dart';
 import 'package:mobile_app/cubit/delete_closed_service_cubit.dart';
+import 'package:mobile_app/cubit/delete_schedule_cart_cubit.dart';
 import 'package:mobile_app/cubit/delete_service_cart_cubit.dart';
 import 'package:mobile_app/cubit/list_reservation_cubit.dart';
 import 'package:mobile_app/cubit/list_schedule_cart_cubit.dart';
@@ -33,5 +35,7 @@ class AppInjector {
     sl.registerFactory(() => ListReservationCubit());
     sl.registerFactory(() => DeleteClosedServiceCubit());
     sl.registerFactory(() => DeleteServiceCartCubit());
+    sl.registerFactory(() => DeleteClosedScheduleCartCubit());
+    sl.registerFactory(() => DeleteScheduleCartCubit());
   }
 }
