@@ -28,7 +28,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       bloc: sendTokenCubit,
       listener: (context, state) {
         if (state is SendTokenSuccess) {
-          Get.to(() => const ForgotPasswordInputTokenpage());
+          Get.to(
+            () => ForgotPasswordInputTokenpage(
+              email: emailController.text,
+            ),
+          );
         }
 
         if (state is SendTokenFailed) {

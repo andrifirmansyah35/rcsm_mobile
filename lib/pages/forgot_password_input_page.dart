@@ -4,9 +4,22 @@ import 'package:get/get.dart';
 import 'package:mobile_app/common/constants.dart';
 import 'package:mobile_app/pages/login_page.dart';
 
-class ForgotPasswordInputPage extends StatelessWidget {
-  const ForgotPasswordInputPage({Key? key}) : super(key: key);
+class ForgotPasswordInputPage extends StatefulWidget {
+  const ForgotPasswordInputPage({
+    Key? key,
+    required this.email,
+    required this.token,
+  }) : super(key: key);
 
+  final String email;
+  final String token;
+
+  @override
+  State<ForgotPasswordInputPage> createState() =>
+      _ForgotPasswordInputPageState();
+}
+
+class _ForgotPasswordInputPageState extends State<ForgotPasswordInputPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
