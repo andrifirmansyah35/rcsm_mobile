@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:mobile_app/app/app_injector.dart';
 import 'package:mobile_app/common/extensions.dart';
+import 'package:mobile_app/cubit/delete_closed_service_cubit.dart';
+import 'package:mobile_app/cubit/delete_service_cart_cubit.dart';
 import 'package:mobile_app/cubit/list_service_cart_cubit.dart';
 import 'package:mobile_app/models/response/schedule_cart_model.dart';
 import 'package:mobile_app/models/response/service_cart_model.dart';
@@ -26,9 +28,25 @@ class ServiceCartPage extends StatefulWidget {
 class _ServiceCartPageState extends State<ServiceCartPage> {
   final selectedServiceId = ValueNotifier<int>(0);
   final listServiceCartCubit = sl<ListServiceCartCubit>();
+  final deleteClosedServiceCubit = sl<DeleteClosedServiceCubit>();
+  final deleteServiceCartCubit = sl<DeleteServiceCartCubit>();
 
   void refresh() {
     listServiceCartCubit.fetchData();
+  }
+
+  void onDeleteAllService() {
+    Get.dialog(
+      dialogDeleteAll(() {
+        deleteClosedServiceCubit.fetchData();
+      }),
+    );
+  }
+
+  void onDeleteService(ServiceCartModel model) {
+    Get.dialog(dialogDeleteService(model, () {
+      deleteServiceCartCubit.fetchData(model.idKeranjangLayanan);
+    }));
   }
 
   @override
@@ -39,152 +57,203 @@ class _ServiceCartPageState extends State<ServiceCartPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<ListServiceCartCubit, ListServiceCartState>(
-      bloc: listServiceCartCubit,
-      listener: (context, state) {
-        if (state is ListServiceCartSuccess) {
-          if (state.response.dataKeranjangLayananOpen.isNotEmpty) {
-            selectedServiceId.value = state
-                .response.dataKeranjangLayananOpen.first.idKeranjangLayanan;
-          }
-        }
-      },
-      builder: (context, state) {
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('Keranjang Layanan'),
-          ),
-          body: RefreshIndicator(
-            onRefresh: () async => refresh(),
-            child: Stack(
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<ListServiceCartCubit, ListServiceCartState>(
+          bloc: listServiceCartCubit,
+          listener: (context, state) {
+            if (state is ListServiceCartSuccess) {
+              if (state.response.dataKeranjangLayananOpen.isNotEmpty) {
+                selectedServiceId.value = state
+                    .response.dataKeranjangLayananOpen.first.idKeranjangLayanan;
+              }
+            }
+          },
+        ),
+        BlocListener<DeleteServiceCartCubit, DeleteServiceCartState>(
+          bloc: deleteServiceCartCubit,
+          listener: (context, state) {
+            if (state is DeleteServiceCartSuccess) {
+              Get.snackbar(
+                'Berhasil',
+                state.response.message,
+                backgroundColor: Theme.of(context).colorScheme.background,
+                colorText: Theme.of(context).colorScheme.primary,
+              );
+              refresh();
+            }
+
+            if (state is DeleteServiceCartFailed) {
+              Get.snackbar(
+                'Gagal',
+                state.message,
+                backgroundColor: Theme.of(context).colorScheme.error,
+                colorText: Theme.of(context).colorScheme.primary,
+              );
+            }
+          },
+        ),
+        BlocListener<DeleteClosedServiceCubit, DeleteClosedServiceState>(
+          bloc: deleteClosedServiceCubit,
+          listener: (context, state) {
+            if (state is DeleteClosedServiceSuccess) {
+              Get.snackbar(
+                'Berhasil',
+                state.response.message,
+                backgroundColor: Theme.of(context).colorScheme.background,
+                colorText: Theme.of(context).colorScheme.primary,
+              );
+              refresh();
+            }
+
+            if (state is DeleteClosedServiceFailed) {
+              Get.snackbar(
+                'Gagal',
+                state.message,
+                backgroundColor: Theme.of(context).colorScheme.error,
+                colorText: Theme.of(context).colorScheme.primary,
+              );
+            }
+          },
+        ),
+      ],
+      child: BlocBuilder<ListServiceCartCubit, ListServiceCartState>(
+        bloc: listServiceCartCubit,
+        builder: (context, state) {
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Keranjang Layanan'),
+            ),
+            body: RefreshIndicator(
+              onRefresh: () async => refresh(),
+              child: Stack(
+                children: [
+                  if (state is ListServiceCartSuccess) listServiceCart(state),
+                  if (state is ListServiceCartFailed)
+                    Center(
+                        child: ErrorIndicator(
+                      message: state.message,
+                      onRefresh: refresh,
+                    )),
+                  if (state is ListServiceCartLoading)
+                    const Center(
+                      child: CircularProgressIndicator(),
+                    )
+                ],
+              ),
+            ),
+            bottomNavigationBar: state is ListServiceCartSuccess
+                ? Card(
+                    color: Theme.of(context).colorScheme.onBackground,
+                    elevation: 50,
+                    margin: EdgeInsets.zero,
+                    child: state.response.dataKeranjangLayananOpen.isNotEmpty
+                        ? Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                final selectedService = state
+                                    .response.dataKeranjangLayananOpen
+                                    .firstWhere(
+                                  (element) =>
+                                      element.idKeranjangLayanan ==
+                                      selectedServiceId.value,
+                                );
+                                Get.to(
+                                  () => TransactionPage(
+                                    selectedService: selectedService,
+                                    scheduleCartModel: widget.scheduleCartModel,
+                                  ),
+                                  preventDuplicates: false,
+                                );
+                              },
+                              child: const Text('Pilih Layanan'),
+                            ),
+                          )
+                        : null,
+                  )
+                : null,
+          );
+        },
+      ),
+    );
+  }
+
+  ListView listServiceCart(ListServiceCartSuccess state) {
+    return ListView(
+      padding: const EdgeInsets.all(12),
+      children: [
+        ValueListenableBuilder<int>(
+          valueListenable: selectedServiceId,
+          builder: (context, value, _) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (state is ListServiceCartSuccess)
-                  ListView(
-                    padding: const EdgeInsets.all(12),
-                    children: [
-                      ValueListenableBuilder<int>(
-                        valueListenable: selectedServiceId,
-                        builder: (context, value, _) {
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              if (state
-                                  .response.dataKeranjangLayananOpen.isNotEmpty)
-                                Column(
-                                  children: List.generate(
-                                    state.response.dataKeranjangLayananOpen
-                                        .length,
-                                    (index) => serviceCartRadio(
-                                      context: context,
-                                      model: state.response
-                                          .dataKeranjangLayananOpen[index],
-                                      selectedValue: value,
-                                    ),
-                                  ),
-                                )
-                              else
-                                SizedBox(
-                                  height: Get.height / 2,
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Text(
-                                        'Keranjang Layanan kamu masih kosong',
-                                      ),
-                                      const SizedBox(height: 20),
-                                      ElevatedButton(
-                                        child: const Text('Tambah Layanan'),
-                                        onPressed: () {
-                                          Get.to(
-                                            () => ServiceCategoryPage(
-                                              scheduleCartModel:
-                                                  widget.scheduleCartModel,
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              const SizedBox(height: 10),
-                              const Divider(),
-                              if (state.response.dataKeranjangClose.isNotEmpty)
-                                Column(
-                                  children: [
-                                    closedServiceHeading(
-                                      context: context,
-                                      onDelete: () {},
-                                    ),
-                                    const SizedBox(height: 5),
-                                    Column(
-                                      children: List.generate(
-                                        state
-                                            .response.dataKeranjangClose.length,
-                                        (index) => Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: 5,
-                                          ),
-                                          child: closedServiceCard(
-                                              context,
-                                              state.response
-                                                  .dataKeranjangClose[index]),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                )
-                            ],
-                          );
-                        },
-                      )
-                    ],
+                if (state.response.dataKeranjangLayananOpen.isNotEmpty)
+                  Column(
+                    children: List.generate(
+                      state.response.dataKeranjangLayananOpen.length,
+                      (index) => serviceCartRadio(
+                        context: context,
+                        model: state.response.dataKeranjangLayananOpen[index],
+                        selectedValue: value,
+                        onDelete: () => onDeleteService(
+                            state.response.dataKeranjangLayananOpen[index]),
+                      ),
+                    ),
+                  )
+                else
+                  SizedBox(
+                    height: Get.height / 2,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'Keranjang Layanan kamu masih kosong',
+                        ),
+                        const SizedBox(height: 20),
+                        ElevatedButton(
+                          child: const Text('Tambah Layanan'),
+                          onPressed: () {
+                            Get.to(
+                              () => ServiceCategoryPage(
+                                scheduleCartModel: widget.scheduleCartModel,
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                if (state is ListServiceCartFailed)
-                  Center(
-                      child: ErrorIndicator(
-                    message: state.message,
-                    onRefresh: refresh,
-                  )),
-                if (state is ListServiceCartLoading)
-                  const Center(
-                    child: CircularProgressIndicator(),
+                const SizedBox(height: 10),
+                const Divider(),
+                if (state.response.dataKeranjangClose.isNotEmpty)
+                  Column(
+                    children: [
+                      closedServiceHeading(
+                        context: context,
+                        onDelete: onDeleteAllService,
+                      ),
+                      const SizedBox(height: 5),
+                      Column(
+                        children: List.generate(
+                          state.response.dataKeranjangClose.length,
+                          (index) => Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 5,
+                            ),
+                            child: closedServiceCard(context,
+                                state.response.dataKeranjangClose[index]),
+                          ),
+                        ),
+                      ),
+                    ],
                   )
               ],
-            ),
-          ),
-          bottomNavigationBar: state is ListServiceCartSuccess
-              ? Card(
-                  color: Theme.of(context).colorScheme.onBackground,
-                  elevation: 50,
-                  margin: EdgeInsets.zero,
-                  child: state.response.dataKeranjangLayananOpen.isNotEmpty
-                      ? Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: ElevatedButton(
-                            onPressed: () {
-                              final selectedService = state
-                                  .response.dataKeranjangLayananOpen
-                                  .firstWhere(
-                                (element) =>
-                                    element.idKeranjangLayanan ==
-                                    selectedServiceId.value,
-                              );
-                              Get.to(
-                                () => TransactionPage(
-                                  selectedService: selectedService,
-                                  scheduleCartModel: widget.scheduleCartModel,
-                                ),
-                                preventDuplicates: false,
-                              );
-                            },
-                            child: const Text('Pilih Layanan'),
-                          ),
-                        )
-                      : null,
-                )
-              : null,
-        );
-      },
+            );
+          },
+        )
+      ],
     );
   }
 
@@ -315,6 +384,131 @@ class _ServiceCartPageState extends State<ServiceCartPage> {
       onChanged: (int? newValue) {
         selectedServiceId.value = newValue!;
       },
+    );
+  }
+
+  Dialog dialogDeleteService(ServiceCartModel model, void Function() onDelete) {
+    return Dialog(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(height: 15),
+            Text(
+              'Hapus Layanan',
+              style: Theme.of(context)
+                  .textTheme
+                  .titleSmall
+                  ?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                text: 'Apakah anda ingin menghapus layanan ',
+                style: Theme.of(context).textTheme.bodySmall,
+                children: <TextSpan>[
+                  TextSpan(
+                    text: '${model.kategoriLayanan} - ${model.layanan}',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const TextSpan(
+                    text: ' dari keranjang layanan?',
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 15),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                InkWell(
+                  onTap: () {
+                    Get.back();
+                  },
+                  child: Text(
+                    'Batalkan',
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ),
+                ),
+                const SizedBox(width: 15),
+                InkWell(
+                  onTap: () {
+                    Get.back();
+                    onDelete();
+                  },
+                  child: Text(
+                    'Ya, Hapus',
+                    style: Theme.of(context).textTheme.labelMedium!.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 15),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Dialog dialogDeleteAll(void Function() onDelete) {
+    return Dialog(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(height: 15),
+            Text(
+              'Hapus Layanan',
+              style: Theme.of(context)
+                  .textTheme
+                  .titleSmall
+                  ?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Apakah anda ingin menghapus semua layanan yang ditutup pada keranjang layanan?',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 15),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                InkWell(
+                  onTap: () {
+                    Get.back();
+                  },
+                  child: Text(
+                    'Batalkan',
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ),
+                ),
+                const SizedBox(width: 15),
+                InkWell(
+                  onTap: () {
+                    Get.back();
+                    onDelete();
+                  },
+                  child: Text(
+                    'Ya, Hapus',
+                    style: Theme.of(context).textTheme.labelMedium!.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 15),
+          ],
+        ),
+      ),
     );
   }
 }

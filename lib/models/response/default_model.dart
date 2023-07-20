@@ -17,7 +17,7 @@ class DefaultResponseModel extends Equatable {
       _$DefaultResponseModelFromJson(json);
 
   @override
-  List<Object> get props => [message];
+  List<Object> get props => [status, message];
 }
 
 @JsonSerializable(createToJson: false)
