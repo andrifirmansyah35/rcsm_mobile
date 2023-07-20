@@ -136,7 +136,7 @@ class _ForgotPasswordInputTokenpageState
                 enableActiveFill: true,
                 controller: tokenController,
                 onCompleted: (v) {
-                  //
+                  onCheckToken();
                 },
                 keyboardType: TextInputType.number,
                 onChanged: (value) {

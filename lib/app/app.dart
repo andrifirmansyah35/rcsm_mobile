@@ -18,6 +18,7 @@ import 'package:mobile_app/cubit/list_schedule_cart_cubit.dart';
 import 'package:mobile_app/cubit/list_service_cart_cubit.dart';
 import 'package:mobile_app/cubit/list_service_cubit.dart';
 import 'package:mobile_app/cubit/login_cubit.dart';
+import 'package:mobile_app/cubit/request_new_password_cubit.dart';
 import 'package:mobile_app/cubit/schedule_check_cubit.dart';
 import 'package:mobile_app/cubit/send_token_cubit.dart';
 import 'package:mobile_app/cubit/service_category_cubit.dart';
@@ -85,6 +86,9 @@ class App extends StatelessWidget {
         ),
         BlocProvider<CheckTokenCubit>(
           create: (context) => sl<CheckTokenCubit>(),
+        ),
+        BlocProvider<RequestNewPasswordCubit>(
+          create: (context) => sl<RequestNewPasswordCubit>(),
         ),
       ],
       child: GetMaterialApp(

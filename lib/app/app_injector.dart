@@ -13,6 +13,7 @@ import 'package:mobile_app/cubit/list_schedule_cart_cubit.dart';
 import 'package:mobile_app/cubit/list_service_cart_cubit.dart';
 import 'package:mobile_app/cubit/list_service_cubit.dart';
 import 'package:mobile_app/cubit/login_cubit.dart';
+import 'package:mobile_app/cubit/request_new_password_cubit.dart';
 import 'package:mobile_app/cubit/schedule_check_cubit.dart';
 import 'package:mobile_app/cubit/send_token_cubit.dart';
 import 'package:mobile_app/cubit/service_category_cubit.dart';
@@ -43,5 +44,6 @@ class AppInjector {
     sl.registerFactory(() => ChangePasswordCubit());
     sl.registerFactory(() => SendTokenCubit());
     sl.registerFactory(() => CheckTokenCubit());
+    sl.registerFactory(() => RequestNewPasswordCubit());
   }
 }

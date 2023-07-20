@@ -63,7 +63,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             backgroundColor: Theme.of(context).colorScheme.background,
             colorText: Theme.of(context).colorScheme.primary,
           );
-          Get.offAll(const HomePage());
+          Get.offAll(() => const HomePage());
         }
 
         if (state is ChangePasswordFailed) {
