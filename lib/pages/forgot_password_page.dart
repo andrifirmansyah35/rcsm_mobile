@@ -2,7 +2,7 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mobile_app/common/constants.dart';
-import 'package:mobile_app/pages/forgot_password_input_page.dart';
+import 'package:mobile_app/pages/forgot_password_input_token_page.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -62,7 +62,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
-                  Get.to(() => const ForgotPasswordInputPage());
+                  Get.to(() => const ForgotPasswordInputTokenpage());
                 },
                 child: const Text('Kirim Token'),
               ),
