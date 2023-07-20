@@ -2,7 +2,7 @@
     package="com.example.mobile_app">
     <uses-permission android:name="android.permission.INTERNET"/>
    <application
-        android:label="RCSM Mobile"
+        android:label="RCSM Bantul"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
