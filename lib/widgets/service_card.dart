@@ -19,6 +19,7 @@ class ServiceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: margin ?? const EdgeInsets.all(5),
+      color: (!data.status) ? Theme.of(context).colorScheme.background : null,
       elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(5),
