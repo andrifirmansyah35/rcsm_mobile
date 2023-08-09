@@ -58,6 +58,7 @@ class _DetailServiceCategoryState extends State<DetailServiceCategoryPage> {
             state.message,
             backgroundColor: Theme.of(context).colorScheme.error,
           );
+          refresh();
         }
 
         if (state is AddServiceCartSuccess) {
